@@ -8,8 +8,9 @@ export interface AllianceMember {
   manaUsed: number;
   totalDead: number;
   totalHealed: number;
-  mertitAmount?: number;
-  roleMember: string;
+  totalMertit?: string;
+  totalKill?: string;
+  roleMember?: string;
 }
 
 export interface AllianceInformation {

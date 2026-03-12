@@ -25,7 +25,8 @@ export const SyncMembersModal = ({ isOpen, onClose, onSuccess, loggedInUser }: S
     power: '',
     mana: '',
     deads: '',
-    merits: ''
+    merits: '',
+    kills: ''
   });
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -98,7 +99,7 @@ export const SyncMembersModal = ({ isOpen, onClose, onSuccess, loggedInUser }: S
         const totalDead = Number(row[columnMapping.deads] || row['Units Dead (Current)'] || row['Dead (Current)'] || row.totalDead || 0);
         const totalHealed = Number(row['Units Healed (Current)'] || row.totalHealed || 0);
         const mertitAmount = Number(row[columnMapping.merits] || row['Mertit'] || row['Merit'] || row.mertitAmount || 0);
-        const roleMember = String(row['Role'] || row.roleMember || '1');
+        const totalKill = Number(row[columnMapping.kills] || row['Kills'] || row['Total Kills'] || row.totalKill || 0);
 
         if (!nameMember || power < powerThreshold) {
           return;
@@ -110,7 +111,10 @@ export const SyncMembersModal = ({ isOpen, onClose, onSuccess, loggedInUser }: S
           existing.manaUsed += manaUsed;
           existing.totalDead += totalDead;
           existing.totalHealed += totalHealed;
-          existing.mertitAmount = (existing.mertitAmount || 0) + mertitAmount;
+          const currentMerit = Number(existing.totalMertit || 0) + mertitAmount;
+          existing.totalMertit = String(currentMerit);
+          const currentKill = Number(existing.totalKill || 0) + totalKill;
+          existing.totalKill = String(currentKill);
         } else {
           memberMap.set(idMember, {
             idMember,
@@ -119,8 +123,8 @@ export const SyncMembersModal = ({ isOpen, onClose, onSuccess, loggedInUser }: S
             manaUsed,
             totalDead,
             totalHealed,
-            mertitAmount,
-            roleMember,
+            totalMertit: String(mertitAmount),
+            totalKill: String(totalKill),
           });
         }
       });
@@ -281,6 +285,7 @@ export const SyncMembersModal = ({ isOpen, onClose, onSuccess, loggedInUser }: S
                             if (key === 'mana') return lowerCol.includes('mana');
                             if (key === 'deads') return lowerCol.includes('dead');
                             if (key === 'merits') return lowerCol.includes('merit');
+                            if (key === 'kills') return lowerCol.includes('kill');
                             return true;
                           });
                           return (

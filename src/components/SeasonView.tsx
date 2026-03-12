@@ -262,7 +262,7 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 frost-glass rounded-2xl md:rounded-[24px] border-white/5 overflow-hidden flex flex-col shadow-2xl">
+      <div className="flex-1 min-h-0 frost-glass rounded-lg md:rounded-xl border-white/5 overflow-hidden flex flex-col shadow-2xl">
         <div className="overflow-x-auto scrollbar-hide">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -411,7 +411,7 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
               initial={{ opacity: 0, y: 100 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 100 }}
-              className="relative w-full bg-[#0a0a0a] border border-white/10 rounded-t-2xl md:rounded-t-[24px] p-6 shadow-2xl flex flex-col max-h-[85vh]"
+              className="relative w-full bg-[#0a0a0a] border border-white/10 rounded-t-xl md:rounded-t-2xl p-6 shadow-2xl flex flex-col max-h-[85vh]"
             >
               <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center gap-3">
@@ -432,7 +432,7 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
               </div>
 
               <div className="overflow-y-auto custom-scrollbar pr-2 space-y-3 pb-4">
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
                   <div className="flex items-center gap-3">
                     <Trophy size={16} className="text-amber-400" />
                     <span className="text-xs font-medium text-slate-300">Merits</span>
@@ -442,7 +442,7 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
                   <div className="flex items-center gap-3">
                     <Zap size={16} className="text-frost-400" />
                     <span className="text-xs font-medium text-slate-300">Mana Used</span>
@@ -452,7 +452,7 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
                   <div className="flex items-center gap-3">
                     <Skull size={16} className="text-red-400" />
                     <span className="text-xs font-medium text-slate-300">Units Dead</span>

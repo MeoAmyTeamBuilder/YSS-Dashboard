@@ -23,7 +23,7 @@ export const PowerChart = ({ members }: PowerChartProps) => {
   }));
 
   return (
-    <div className="frost-glass p-4 rounded-3xl border-frost-500/10 h-full flex flex-col min-h-0">
+    <div className="frost-glass p-4 rounded-xl md:rounded-2xl border-frost-500/10 h-full flex flex-col min-h-0">
       <div className="flex items-center justify-between mb-2 flex-shrink-0">
         <h3 className="text-sm font-bold text-white">Power Distribution</h3>
         <span className="text-[10px] text-slate-400 uppercase tracking-wider">Member Count</span>

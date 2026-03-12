@@ -12,7 +12,7 @@ interface StatCardProps {
 
 export const StatCard = ({ label, value, icon: Icon, trend }: StatCardProps) => {
   return (
-    <div className="frost-glass p-3 md:p-4 rounded-2xl md:rounded-3xl relative overflow-hidden group hover:border-frost-500/30 transition-all duration-300 flex flex-col justify-center h-[70px] md:h-[100px]">
+    <div className="frost-glass p-3 md:p-4 rounded-xl md:rounded-2xl relative overflow-hidden group hover:border-frost-500/30 transition-all duration-300 flex flex-col justify-center h-[70px] md:h-[100px]">
       <div className="absolute -right-2 -top-2 text-frost-500/5 group-hover:text-frost-500/10 transition-colors hidden md:block">
         <Icon size={80} />
       </div>

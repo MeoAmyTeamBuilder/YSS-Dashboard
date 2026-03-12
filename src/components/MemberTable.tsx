@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AllianceMember } from '../types';
-import { Users, MoreVertical, Swords, Crown, User, X, Shield, Zap, Skull, Heart } from 'lucide-react';
+import { Users, MoreVertical, Swords, Crown, User, X, Shield, Zap, Skull, Heart, Trophy } from 'lucide-react';
 import { formatCompactNumber } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -33,7 +33,7 @@ export const MemberTable = ({ members }: MemberTableProps) => {
 
   return (
     <>
-      <div className="frost-glass rounded-2xl md:rounded-[24px] border-white/5 overflow-hidden flex flex-col h-full min-h-0 shadow-2xl">
+      <div className="frost-glass rounded-lg md:rounded-xl border-white/5 overflow-hidden flex flex-col h-full min-h-0 shadow-2xl">
         <div className="overflow-x-auto scrollbar-hide">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -44,6 +44,8 @@ export const MemberTable = ({ members }: MemberTableProps) => {
                 <th className="hidden md:table-cell p-4 md:p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">Mana Used</th>
                 <th className="hidden md:table-cell p-4 md:p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">Units Dead</th>
                 <th className="hidden md:table-cell p-4 md:p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">Units Healed</th>
+                <th className="hidden md:table-cell p-4 md:p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">Merits</th>
+                <th className="hidden md:table-cell p-4 md:p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">Kills</th>
                 <th className="md:hidden p-4 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">Details</th>
               </tr>
             </thead>
@@ -74,7 +76,7 @@ export const MemberTable = ({ members }: MemberTableProps) => {
                     </div>
                   </td>
                   <td className="hidden md:table-cell p-3 md:p-6">
-                    <RoleBadge role={member.roleMember} />
+                    <RoleBadge role={member.roleMember || '1'} />
                   </td>
                   <td className="p-3 md:p-6 text-right">
                     <span className="text-xs md:text-base font-mono font-black text-frost-300 text-glow">
@@ -94,6 +96,16 @@ export const MemberTable = ({ members }: MemberTableProps) => {
                   <td className="hidden md:table-cell p-3 md:p-6 text-right">
                     <span className="text-xs md:text-base font-mono font-black text-emerald-400 text-glow">
                       {formatCompactNumber(member.totalHealed || 0)}
+                    </span>
+                  </td>
+                  <td className="hidden md:table-cell p-3 md:p-6 text-right">
+                    <span className="text-xs md:text-base font-mono font-black text-amber-400 text-glow">
+                      {formatCompactNumber(Number(member.totalMertit || 0))}
+                    </span>
+                  </td>
+                  <td className="hidden md:table-cell p-3 md:p-6 text-right">
+                    <span className="text-xs md:text-base font-mono font-black text-blue-400 text-glow">
+                      {formatCompactNumber(Number(member.totalKill || 0))}
                     </span>
                   </td>
                   <td className="md:hidden p-3 text-right">
@@ -123,7 +135,7 @@ export const MemberTable = ({ members }: MemberTableProps) => {
               initial={{ opacity: 0, y: 100 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 100 }}
-              className="relative w-full bg-[#0a0a0a] border border-white/10 rounded-t-2xl md:rounded-t-[24px] p-6 shadow-2xl flex flex-col max-h-[85vh]"
+              className="relative w-full bg-[#0a0a0a] border border-white/10 rounded-t-xl md:rounded-t-2xl p-6 shadow-2xl flex flex-col max-h-[85vh]"
             >
               <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center gap-3">
@@ -144,15 +156,15 @@ export const MemberTable = ({ members }: MemberTableProps) => {
               </div>
 
               <div className="overflow-y-auto custom-scrollbar pr-2 space-y-3 pb-4">
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
                   <div className="flex items-center gap-3">
                     <Shield size={16} className="text-slate-400" />
                     <span className="text-xs font-medium text-slate-300">Role</span>
                   </div>
-                  <RoleBadge role={selectedMember.roleMember} />
+                  <RoleBadge role={selectedMember.roleMember || '1'} />
                 </div>
                 
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
                   <div className="flex items-center gap-3">
                     <Zap size={16} className="text-frost-400" />
                     <span className="text-xs font-medium text-slate-300">Power</span>
@@ -162,7 +174,7 @@ export const MemberTable = ({ members }: MemberTableProps) => {
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
                   <div className="flex items-center gap-3">
                     <Zap size={16} className="text-slate-400" />
                     <span className="text-xs font-medium text-slate-300">Mana Used</span>
@@ -172,7 +184,7 @@ export const MemberTable = ({ members }: MemberTableProps) => {
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
                   <div className="flex items-center gap-3">
                     <Skull size={16} className="text-red-400" />
                     <span className="text-xs font-medium text-slate-300">Units Dead</span>
@@ -182,13 +194,33 @@ export const MemberTable = ({ members }: MemberTableProps) => {
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
                   <div className="flex items-center gap-3">
                     <Heart size={16} className="text-emerald-400" />
                     <span className="text-xs font-medium text-slate-300">Units Healed</span>
                   </div>
                   <span className="text-sm font-mono font-bold text-emerald-400">
                     {formatCompactNumber(selectedMember.totalHealed || 0)}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
+                  <div className="flex items-center gap-3">
+                    <Trophy size={16} className="text-amber-400" />
+                    <span className="text-xs font-medium text-slate-300">Merits</span>
+                  </div>
+                  <span className="text-sm font-mono font-bold text-amber-400">
+                    {formatCompactNumber(Number(selectedMember.totalMertit || 0))}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
+                  <div className="flex items-center gap-3">
+                    <Swords size={16} className="text-blue-400" />
+                    <span className="text-xs font-medium text-slate-300">Kills</span>
+                  </div>
+                  <span className="text-sm font-mono font-bold text-blue-400">
+                    {formatCompactNumber(Number(selectedMember.totalKill || 0))}
                   </span>
                 </div>
               </div>

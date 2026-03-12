@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AllianceMember } from '../types';
-import { Trophy, Zap, Skull, Heart, X } from 'lucide-react';
+import { Trophy, Zap, Skull, Heart, X, Swords } from 'lucide-react';
 import { formatCompactNumber } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -11,7 +11,7 @@ interface RankingViewProps {
 const RankingModal = ({ isOpen, onClose, title, icon: Icon, members, valueKey, valueLabel, colorClass }: any) => {
   if (!isOpen) return null;
   
-  const sortedMembers = [...members].sort((a, b) => (b[valueKey] || 0) - (a[valueKey] || 0));
+  const sortedMembers = [...members].sort((a, b) => Number(b[valueKey] || 0) - Number(a[valueKey] || 0));
 
   const getRankClasses = (index: number) => {
     if (index === 0) return 'border-red-500 text-red-500 drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]';
@@ -34,7 +34,7 @@ const RankingModal = ({ isOpen, onClose, title, icon: Icon, members, valueKey, v
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-        className="relative w-full max-w-md frost-glass p-6 rounded-2xl md:rounded-[24px] border-white/10 shadow-2xl max-h-[85vh] flex flex-col"
+        className="relative w-full max-w-md frost-glass p-6 rounded-xl md:rounded-2xl border-white/10 shadow-2xl max-h-[85vh] flex flex-col"
       >
         <button 
           onClick={onClose}
@@ -73,7 +73,7 @@ const RankingModal = ({ isOpen, onClose, title, icon: Icon, members, valueKey, v
                       {member.nameMember}
                     </td>
                     <td className="py-3 text-right font-mono text-white text-xs">
-                      {formatCompactNumber(member[valueKey] || 0)}
+                      {formatCompactNumber(Number(member[valueKey] || 0))}
                     </td>
                   </tr>
                 );
@@ -88,7 +88,7 @@ const RankingModal = ({ isOpen, onClose, title, icon: Icon, members, valueKey, v
 
 export const RankingTable = ({ title, icon: Icon, members, valueKey, valueLabel, colorClass, limit, variant = 'table', badgeClass }: any) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const sortedMembers = [...members].sort((a, b) => (b[valueKey] || 0) - (a[valueKey] || 0));
+  const sortedMembers = [...members].sort((a, b) => Number(b[valueKey] || 0) - Number(a[valueKey] || 0));
   const displayMembers = limit ? sortedMembers.slice(0, limit) : sortedMembers;
 
   const getRankClasses = (index: number) => {
@@ -101,7 +101,7 @@ export const RankingTable = ({ title, icon: Icon, members, valueKey, valueLabel,
   return (
     <>
       <div 
-        className="frost-glass p-3 md:p-4 rounded-2xl md:rounded-[24px] border-frost-500/10 flex flex-col h-auto md:h-full overflow-hidden min-w-0 cursor-pointer md:cursor-default hover:bg-white/[0.02] transition-colors"
+        className="frost-glass p-3 md:p-4 rounded-xl md:rounded-2xl border-frost-500/10 flex flex-col h-auto md:h-full overflow-hidden min-w-0 cursor-pointer md:cursor-default hover:bg-white/[0.02] transition-colors"
         onClick={() => {
           if (window.innerWidth < 768) {
             setIsModalOpen(true);
@@ -139,7 +139,7 @@ export const RankingTable = ({ title, icon: Icon, members, valueKey, valueLabel,
                         {member.nameMember}
                       </td>
                       <td className="py-2.5 text-right font-mono text-white text-[11px]">
-                        {formatCompactNumber(member[valueKey] || 0)}
+                        {formatCompactNumber(Number(member[valueKey] || 0))}
                       </td>
                     </tr>
                   );
@@ -148,14 +148,14 @@ export const RankingTable = ({ title, icon: Icon, members, valueKey, valueLabel,
             </table>
           ) : (
             displayMembers.map((member: any, index: number) => (
-              <div key={member.id} className="flex items-center justify-between p-1 md:p-1.5 rounded-xl md:rounded-2xl bg-white/5 border border-white/5">
+              <div key={member.id} className="flex items-center justify-between p-1 md:p-1.5 rounded-lg md:rounded-xl bg-white/5 border border-white/5">
                 <div className="flex items-center gap-2 md:gap-3">
                   <span className={`text-[9px] font-bold w-4 h-4 flex items-center justify-center rounded-full ${index === 0 ? (badgeClass || 'bg-white text-black') : 'bg-white/10 text-slate-400'}`}>
                     {index + 1}
                   </span>
                   <span className="text-[10px] md:text-xs font-medium text-slate-200 truncate max-w-[100px]">{member.nameMember}</span>
                 </div>
-                <span className={`text-[10px] md:text-xs font-mono font-bold ${colorClass}`}>{formatCompactNumber(member[valueKey] || 0)}</span>
+                <span className={`text-[10px] md:text-xs font-mono font-bold ${colorClass}`}>{formatCompactNumber(Number(member[valueKey] || 0))}</span>
               </div>
             ))
           )}
@@ -182,11 +182,13 @@ export const RankingTable = ({ title, icon: Icon, members, valueKey, valueLabel,
 
 export const RankingView = ({ members }: RankingViewProps) => {
   return (
-    <div className="h-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+    <div className="h-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
       <RankingTable title="Top Power" icon={Trophy} members={members} valueKey="topPower" valueLabel="Power" colorClass="text-amber-400" />
       <RankingTable title="Top Total Mana Used" icon={Zap} members={members} valueKey="manaUsed" valueLabel="Total Mana" colorClass="text-frost-400" />
       <RankingTable title="Top Total Dead" icon={Skull} members={members} valueKey="totalDead" valueLabel="Dead" colorClass="text-red-400" />
       <RankingTable title="Top Total Healed" icon={Heart} members={members} valueKey="totalHealed" valueLabel="Healed" colorClass="text-emerald-400" />
+      <RankingTable title="Top Merits" icon={Trophy} members={members} valueKey="totalMertit" valueLabel="Merits" colorClass="text-amber-300" />
+      <RankingTable title="Top Kills" icon={Swords} members={members} valueKey="totalKill" valueLabel="Kills" colorClass="text-blue-400" />
     </div>
   );
 };

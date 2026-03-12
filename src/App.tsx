@@ -238,7 +238,7 @@ export default function App() {
                 {/* Right Side: Alliance Info Box (Moved to top on mobile) */}
                 <div className="lg:col-span-1 order-first lg:order-last">
                   <div 
-                    className={`frost-glass p-4 md:p-6 rounded-3xl border-frost-500/20 bg-gradient-to-br from-[#0a0a0a]/90 to-transparent backdrop-blur-xl flex flex-col h-auto lg:h-full cursor-pointer lg:cursor-default mb-2 lg:mb-0`}
+                    className={`frost-glass p-4 md:p-6 rounded-xl md:rounded-2xl border-frost-500/20 bg-gradient-to-br from-[#0a0a0a]/90 to-transparent backdrop-blur-xl flex flex-col h-auto lg:h-full cursor-pointer lg:cursor-default mb-2 lg:mb-0`}
                     onClick={() => {
                       if (window.innerWidth < 1024) {
                         setIsProfileModalOpen(true);
@@ -359,7 +359,7 @@ export default function App() {
                       <PowerChart members={members} />
                     </div>
                     <div 
-                      className="md:hidden frost-glass p-4 rounded-3xl border-frost-500/10 flex flex-col cursor-pointer hover:bg-white/[0.02] transition-colors"
+                      className="md:hidden frost-glass p-4 rounded-xl md:rounded-2xl border-frost-500/10 flex flex-col cursor-pointer hover:bg-white/[0.02] transition-colors"
                       onClick={() => setIsChartModalOpen(true)}
                     >
                       <div className="flex items-center gap-3">
@@ -519,7 +519,7 @@ export default function App() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-4xl h-[60vh] bg-[#0a0a0a] border border-white/10 rounded-[24px] md:rounded-[32px] overflow-hidden flex flex-col shadow-2xl p-6"
+              className="relative w-full max-w-4xl h-[60vh] bg-[#0a0a0a] border border-white/10 rounded-xl md:rounded-2xl overflow-hidden flex flex-col shadow-2xl p-6"
             >
               <button 
                 onClick={() => setIsChartModalOpen(false)}

@@ -113,7 +113,7 @@ export const ManageRecordsModal = ({ isOpen, onClose, onRecordsUpdated }: Manage
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-2xl bg-[#0a0a0a] border border-white/10 rounded-[32px] shadow-2xl overflow-hidden flex flex-col max-h-[80vh]"
+            className="relative w-full max-w-2xl bg-[#0a0a0a] border border-white/10 rounded-2xl md:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[80vh]"
           >
             <div className="p-6 border-b border-white/5 flex items-center justify-between bg-gradient-to-r from-frost-500/10 to-transparent">
               <div className="flex items-center gap-4">
@@ -149,7 +149,7 @@ export const ManageRecordsModal = ({ isOpen, onClose, onRecordsUpdated }: Manage
                   {records.map((record) => (
                     <div 
                       key={record.id}
-                      className="p-4 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 transition-all"
+                      className="p-4 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 transition-all"
                     >
                       {editingId === record.id ? (
                         <div className="space-y-4">
