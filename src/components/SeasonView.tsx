@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { AllianceMember, CheckRecord } from '../types';
-import { Search, Database, Trophy, Zap, Skull, Users, ChevronDown, ArrowDownUp, ArrowDown, ArrowUp, Hash, SortAsc, SortDesc, X, MoreVertical } from 'lucide-react';
+import { Search, Database, Trophy, Zap, Skull, Users, ChevronDown, ArrowDownUp, ArrowDown, ArrowUp, Hash, SortAsc, SortDesc, X, MoreVertical, RefreshCw } from 'lucide-react';
 import { formatCompactNumber } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -18,6 +18,8 @@ interface JoinedRecord {
   merits: number;
   mana: number;
   deads: number;
+  heals: number;
+  kills: number;
 }
 
 export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
@@ -26,7 +28,7 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
   const [joinedData, setJoinedData] = useState<JoinedRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState<'all' | 'merits' | 'mana' | 'deads'>('all');
+  const [filterType, setFilterType] = useState<'all' | 'merits' | 'mana' | 'deads' | 'heals' | 'kills'>('all');
   const [sortType, setSortType] = useState<'high-low' | 'low-high' | 'id' | 'az' | 'za'>('high-low');
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
   const [selectedJoinedRecord, setSelectedJoinedRecord] = useState<JoinedRecord | null>(null);
@@ -53,15 +55,21 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
   const fetchJoinedData = async (recordId: number) => {
     try {
       setLoading(true);
-      const [meritsRes, manaRes, deadsRes] = await Promise.all([
+      console.log('Fetching joined data for record:', recordId);
+      
+      const [meritsRes, manaRes, deadsRes, healsRes, killsRes] = await Promise.all([
         supabase.from('CheckMertit').select('*').eq('idCheckRecord', recordId),
         supabase.from('CheckMana').select('*').eq('idCheckRecord', recordId),
-        supabase.from('CheckDead').select('*').eq('idCheckRecord', recordId)
+        supabase.from('CheckDead').select('*').eq('idCheckRecord', recordId),
+        supabase.from('CheckHeal').select('*').eq('idCheckRecord', recordId),
+        supabase.from('CheckKill').select('*').eq('idCheckRecord', recordId)
       ]);
 
-      if (meritsRes.error) throw meritsRes.error;
-      if (manaRes.error) throw manaRes.error;
-      if (deadsRes.error) throw deadsRes.error;
+      if (meritsRes.error) console.error('Error fetching merits:', meritsRes.error);
+      if (manaRes.error) console.error('Error fetching mana:', manaRes.error);
+      if (deadsRes.error) console.error('Error fetching deads:', deadsRes.error);
+      if (healsRes.error) console.error('Error fetching heals:', healsRes.error);
+      if (killsRes.error) console.error('Error fetching kills:', killsRes.error);
 
       const dataMap = new Map<number, JoinedRecord>();
       members.forEach(m => {
@@ -72,30 +80,53 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
             nameMember: m.nameMember,
             merits: 0,
             mana: 0,
-            deads: 0
+            deads: 0,
+            heals: 0,
+            kills: 0
           });
         }
       });
 
-      meritsRes.data.forEach(item => {
-        const record = dataMap.get(item.idMember);
-        if (record) record.merits = item.mertits;
-      });
+      if (meritsRes.data) {
+        meritsRes.data.forEach(item => {
+          const record = dataMap.get(item.idMember);
+          if (record) record.merits = item.mertits;
+        });
+      }
 
-      manaRes.data.forEach(item => {
-        const record = dataMap.get(item.idMember);
-        if (record) record.mana = item.deads;
-      });
+      if (manaRes.data) {
+        manaRes.data.forEach(item => {
+          const record = dataMap.get(item.idMember);
+          if (record) record.mana = item.deads;
+        });
+      }
 
-      deadsRes.data.forEach(item => {
-        const record = dataMap.get(item.idMember);
-        if (record) record.deads = item.deads;
-      });
+      if (deadsRes.data) {
+        deadsRes.data.forEach(item => {
+          const record = dataMap.get(item.idMember);
+          if (record) record.deads = item.deads;
+        });
+      }
+
+      if (healsRes.data) {
+        healsRes.data.forEach(item => {
+          const record = dataMap.get(item.idMember);
+          if (record) record.heals = item.heals;
+        });
+      }
+
+      if (killsRes.data) {
+        killsRes.data.forEach(item => {
+          const record = dataMap.get(item.idMember);
+          if (record) record.kills = item.kills;
+        });
+      }
 
       const filtered = Array.from(dataMap.values()).filter(r => 
-        r.merits !== 0 || r.mana !== 0 || r.deads !== 0
+        r.merits !== 0 || r.mana !== 0 || r.deads !== 0 || r.heals !== 0 || r.kills !== 0
       );
 
+      console.log(`Found ${filtered.length} active records for this season.`);
       setJoinedData(filtered);
     } catch (error) {
       console.error('Error fetching joined data:', error);
@@ -136,6 +167,18 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
   };
 
   const colSpan = filterType === 'all' ? 4 : 2;
+
+  if (checkRecords.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center h-full">
+        <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mb-6 border border-white/10">
+          <Database className="text-frost-500" size={40} />
+        </div>
+        <h2 className="text-2xl font-bold text-white mb-2">No Season Records Found</h2>
+        <p className="text-slate-400 max-w-md">Please import season data in the Settings tab to start tracking performance.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col gap-6 scrollbar-hide">
@@ -200,11 +243,18 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
+            <button
+              onClick={() => selectedRecordId && fetchJoinedData(selectedRecordId)}
+              className="p-3 bg-white/5 border border-white/10 rounded-2xl text-frost-400 hover:bg-white/10 transition-all"
+              title="Refresh Data"
+            >
+              <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+            </button>
           </div>
 
           <div className="flex items-center gap-3 flex-wrap">
             <div className="flex items-center gap-2">
-              {(['merits', 'mana', 'deads'] as const).map(type => (
+              {(['merits', 'mana', 'deads', 'heals', 'kills'] as const).map(type => (
                 <button
                   key={type}
                   onClick={() => setFilterType(filterType === type ? 'all' : type)}
@@ -289,6 +339,22 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
                     <div className="flex items-center justify-end gap-2">
                       <Skull size={14} className="text-red-400" />
                       Units Dead
+                    </div>
+                  </th>
+                )}
+                {(filterType === 'all' || filterType === 'kills') && (
+                  <th className={`p-4 md:p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right ${filterType === 'all' ? 'hidden md:table-cell' : ''}`}>
+                    <div className="flex items-center justify-end gap-2">
+                      <Trophy size={14} className="text-emerald-400" />
+                      Kills
+                    </div>
+                  </th>
+                )}
+                {(filterType === 'all' || filterType === 'heals') && (
+                  <th className={`p-4 md:p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right ${filterType === 'all' ? 'hidden md:table-cell' : ''}`}>
+                    <div className="flex items-center justify-end gap-2">
+                      <Zap size={14} className="text-blue-400" />
+                      Heals
                     </div>
                   </th>
                 )}
@@ -381,6 +447,30 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
                         </div>
                       </td>
                     )}
+                    {(filterType === 'all' || filterType === 'kills') && (
+                      <td className={`p-3 md:p-6 text-right ${filterType === 'all' ? 'hidden md:table-cell' : ''}`}>
+                        <div className="flex flex-col items-end">
+                          <span className="text-xs md:text-base font-mono font-black text-emerald-400 text-glow">
+                            {formatCompactNumber(item.kills)}
+                          </span>
+                          <div className="w-12 h-1 bg-emerald-400/10 rounded-full mt-1 overflow-hidden">
+                            <div className="h-full bg-emerald-400" style={{ width: `${Math.min(100, (item.kills / 1000000) * 100)}%` }} />
+                          </div>
+                        </div>
+                      </td>
+                    )}
+                    {(filterType === 'all' || filterType === 'heals') && (
+                      <td className={`p-3 md:p-6 text-right ${filterType === 'all' ? 'hidden md:table-cell' : ''}`}>
+                        <div className="flex flex-col items-end">
+                          <span className="text-xs md:text-base font-mono font-black text-blue-400 text-glow">
+                            {formatCompactNumber(item.heals)}
+                          </span>
+                          <div className="w-12 h-1 bg-blue-400/10 rounded-full mt-1 overflow-hidden">
+                            <div className="h-full bg-blue-400" style={{ width: `${Math.min(100, (item.heals / 10000000) * 100)}%` }} />
+                          </div>
+                        </div>
+                      </td>
+                    )}
                     {filterType === 'all' && (
                       <td className="md:hidden p-3 text-right">
                         <button className="p-2 text-slate-500 hover:text-white transition-colors rounded-xl hover:bg-white/5">
@@ -459,6 +549,26 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
                   </div>
                   <span className="text-sm font-mono font-bold text-red-400">
                     {formatCompactNumber(selectedJoinedRecord.deads || 0)}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
+                  <div className="flex items-center gap-3">
+                    <Trophy size={16} className="text-emerald-400" />
+                    <span className="text-xs font-medium text-slate-300">Kills</span>
+                  </div>
+                  <span className="text-sm font-mono font-bold text-emerald-400">
+                    {formatCompactNumber(selectedJoinedRecord.kills || 0)}
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
+                  <div className="flex items-center gap-3">
+                    <Zap size={16} className="text-blue-400" />
+                    <span className="text-xs font-medium text-slate-300">Heals</span>
+                  </div>
+                  <span className="text-sm font-mono font-bold text-blue-400">
+                    {formatCompactNumber(selectedJoinedRecord.heals || 0)}
                   </span>
                 </div>
               </div>

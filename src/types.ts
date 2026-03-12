@@ -56,6 +56,20 @@ export interface CheckDead {
   idCheckRecord: number;
 }
 
+export interface CheckHeal {
+  id?: number;
+  idMember: number;
+  heals: number;
+  idCheckRecord: number;
+}
+
+export interface CheckKill {
+  id?: number;
+  idMember: number;
+  kills: number;
+  idCheckRecord: number;
+}
+
 export interface CheckRecord {
   id?: number;
   nameRecord: string;

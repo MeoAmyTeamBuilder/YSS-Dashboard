@@ -3,20 +3,24 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Database, Trash2, Edit2, Calendar, Check, AlertTriangle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
+import { User } from '../types';
+import { checkPermission } from '../lib/permissions';
 
 interface ManageRecordsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onRecordsUpdated: () => void;
+  loggedInUser: User | null;
 }
 
-export const ManageRecordsModal = ({ isOpen, onClose, onRecordsUpdated }: ManageRecordsModalProps) => {
+export const ManageRecordsModal = ({ isOpen, onClose, onRecordsUpdated, loggedInUser }: ManageRecordsModalProps) => {
   const [records, setRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editName, setEditName] = useState('');
   const [editDate, setEditDate] = useState('');
   const [isDeleting, setIsDeleting] = useState<number | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
   const fetchRecords = async () => {
     setLoading(true);
@@ -53,6 +57,10 @@ export const ManageRecordsModal = ({ isOpen, onClose, onRecordsUpdated }: Manage
   };
 
   const handleSave = async (id: number) => {
+    if (!checkPermission(loggedInUser, ['1', '2'])) {
+      toast.error('You do not have permission to update records');
+      return;
+    }
     try {
       const { error } = await supabase
         .from('CheckRecord')
@@ -71,27 +79,63 @@ export const ManageRecordsModal = ({ isOpen, onClose, onRecordsUpdated }: Manage
   };
 
   const handleDelete = async (id: number) => {
+    if (!checkPermission(loggedInUser, ['1', '2'])) {
+      toast.error('You do not have permission to delete records');
+      return;
+    }
+    if (!id) {
+      toast.error('Invalid record ID');
+      return;
+    }
+
     setIsDeleting(id);
     try {
+      console.log('Starting deletion for record ID:', id);
       // 1. Delete associated data first (cascading manually as per request)
       const { error: deadError } = await supabase.from('CheckDead').delete().eq('idCheckRecord', id);
-      if (deadError) throw deadError;
+      if (deadError) {
+        console.error('Error deleting CheckDead:', deadError);
+        throw deadError;
+      }
 
       const { error: manaError } = await supabase.from('CheckMana').delete().eq('idCheckRecord', id);
-      if (manaError) throw manaError;
+      if (manaError) {
+        console.error('Error deleting CheckMana:', manaError);
+        throw manaError;
+      }
 
       const { error: meritError } = await supabase.from('CheckMertit').delete().eq('idCheckRecord', id);
-      if (meritError) throw meritError;
+      if (meritError) {
+        console.error('Error deleting CheckMertit:', meritError);
+        throw meritError;
+      }
+
+      const { error: healError } = await supabase.from('CheckHeal').delete().eq('idCheckRecord', id);
+      if (healError) {
+        console.error('Error deleting CheckHeal:', healError);
+        throw healError;
+      }
+
+      const { error: killError } = await supabase.from('CheckKill').delete().eq('idCheckRecord', id);
+      if (killError) {
+        console.error('Error deleting CheckKill:', killError);
+        throw killError;
+      }
 
       // 2. Delete the record itself
       const { error: recordError } = await supabase.from('CheckRecord').delete().eq('id', id);
-      if (recordError) throw recordError;
+      if (recordError) {
+        console.error('Error deleting CheckRecord:', recordError);
+        throw recordError;
+      }
 
       toast.success('Record and all associated data deleted');
+      setConfirmDeleteId(null);
       fetchRecords();
       onRecordsUpdated();
     } catch (error: any) {
-      toast.error('Failed to delete record');
+      console.error('Delete error details:', error);
+      toast.error(error?.message || 'Failed to delete record');
     } finally {
       setIsDeleting(null);
     }
@@ -203,29 +247,56 @@ export const ManageRecordsModal = ({ isOpen, onClose, onRecordsUpdated }: Manage
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <button 
-                              onClick={() => handleEdit(record)}
-                              className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-frost-400 transition-all"
-                              title="Edit Record"
-                            >
-                              <Edit2 size={16} />
-                            </button>
-                            <button 
-                              onClick={() => {
-                                if (window.confirm('Are you sure you want to delete this record? This will also delete all associated Merits, Mana, and Dead data. This action cannot be undone.')) {
-                                  handleDelete(record.id);
-                                }
-                              }}
-                              disabled={isDeleting === record.id}
-                              className="p-2 rounded-lg bg-white/5 hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition-all disabled:opacity-50"
-                              title="Delete Record"
-                            >
-                              {isDeleting === record.id ? (
-                                <div className="w-4 h-4 border-2 border-red-400 border-t-transparent rounded-full animate-spin" />
-                              ) : (
-                                <Trash2 size={16} />
-                              )}
-                            </button>
+                            {confirmDeleteId === record.id ? (
+                              <div className="flex items-center gap-2 bg-red-500/10 p-1.5 rounded-xl border border-red-500/20 animate-in fade-in slide-in-from-right-4 duration-300">
+                                <div className="flex flex-col px-2">
+                                  <span className="text-[9px] font-black text-red-400 uppercase leading-none">Are you sure?</span>
+                                  <span className="text-[8px] text-red-400/60 uppercase tracking-tighter">Permanent action</span>
+                                </div>
+                                <div className="flex gap-1">
+                                  <button 
+                                    onClick={() => handleDelete(record.id)}
+                                    disabled={isDeleting === record.id}
+                                    className="px-3 py-1.5 rounded-lg bg-red-500 text-white text-[10px] font-bold hover:bg-red-600 transition-all disabled:opacity-50 flex items-center gap-1"
+                                    title="Confirm Delete"
+                                  >
+                                    {isDeleting === record.id ? (
+                                      <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    ) : (
+                                      <>
+                                        <Check size={12} />
+                                        Yes
+                                      </>
+                                    )}
+                                  </button>
+                                  <button 
+                                    onClick={() => setConfirmDeleteId(null)}
+                                    disabled={isDeleting === record.id}
+                                    className="px-3 py-1.5 rounded-lg bg-white/5 text-slate-400 text-[10px] font-bold hover:text-white transition-all disabled:opacity-50"
+                                    title="Cancel"
+                                  >
+                                    No
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                <button 
+                                  onClick={() => handleEdit(record)}
+                                  className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-frost-400 transition-all"
+                                  title="Edit Record"
+                                >
+                                  <Edit2 size={16} />
+                                </button>
+                                <button 
+                                  onClick={() => setConfirmDeleteId(record.id)}
+                                  className="p-2 rounded-lg bg-white/5 hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition-all"
+                                  title="Delete Record"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              </>
+                            )}
                           </div>
                         </div>
                       )}
@@ -241,7 +312,7 @@ export const ManageRecordsModal = ({ isOpen, onClose, onRecordsUpdated }: Manage
               </div>
               <p className="text-[10px] text-slate-500 leading-relaxed">
                 <span className="font-bold text-amber-500 uppercase block mb-1">Warning</span>
-                Deleting a record will permanently remove all member performance data (Merits, Mana, Units Dead) associated with that specific check date.
+                Deleting a record will permanently remove all member performance data (Merits, Mana, Units Dead, Kills, Heals) associated with that specific check date.
               </p>
             </div>
           </motion.div>

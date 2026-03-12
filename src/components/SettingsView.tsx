@@ -195,6 +195,7 @@ export const SettingsView = ({ loggedInUser, onLeadershipUpdated, onSetPowerThre
       <ImportSeasonModal
         isOpen={isImportSeasonModalOpen}
         onClose={() => setIsImportSeasonModalOpen(false)}
+        onImportSuccess={onLeadershipUpdated}
         loggedInUser={loggedInUser}
       />
 
@@ -209,6 +210,7 @@ export const SettingsView = ({ loggedInUser, onLeadershipUpdated, onSetPowerThre
         isOpen={isManageRecordsModalOpen}
         onClose={() => setIsManageRecordsModalOpen(false)}
         onRecordsUpdated={onLeadershipUpdated}
+        loggedInUser={loggedInUser}
       />
     </div>
   );

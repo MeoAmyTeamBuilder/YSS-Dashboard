@@ -11,10 +11,11 @@ import { checkPermission } from '../lib/permissions';
 interface ImportSeasonModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onImportSuccess?: () => void;
   loggedInUser: User | null;
 }
 
-export const ImportSeasonModal = ({ isOpen, onClose, loggedInUser }: ImportSeasonModalProps) => {
+export const ImportSeasonModal = ({ isOpen, onClose, onImportSuccess, loggedInUser }: ImportSeasonModalProps) => {
   const [step, setStep] = useState(1);
   const [nameRecord, setNameRecord] = useState('');
   const [dateRecord, setDateRecord] = useState(new Date().toISOString().split('T')[0]);
@@ -24,7 +25,9 @@ export const ImportSeasonModal = ({ isOpen, onClose, loggedInUser }: ImportSeaso
   const [columnMapping, setColumnMapping] = useState({
     merits: '',
     mana: '',
-    deads: ''
+    deads: '',
+    heals: '',
+    kills: ''
   });
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -72,7 +75,11 @@ export const ImportSeasonModal = ({ isOpen, onClose, loggedInUser }: ImportSeaso
       if (membersError) throw membersError;
       
       const memberMap = new Map<string, number>();
-      members.forEach(m => memberMap.set(m.idMember, m.id));
+      members.forEach(m => {
+        if (m.idMember) {
+          memberMap.set(String(m.idMember).trim(), m.id);
+        }
+      });
 
       // 1. Create CheckRecord first
       const { data: recordData, error: recordError } = await supabase
@@ -98,9 +105,11 @@ export const ImportSeasonModal = ({ isOpen, onClose, loggedInUser }: ImportSeaso
       const manaRecords: any[] = [];
       const mertitRecords: any[] = [];
       const deadRecords: any[] = [];
+      const healRecords: any[] = [];
+      const killRecords: any[] = [];
 
       jsonData.forEach((row) => {
-        const lordId = String(row['Lord ID'] || row.idMember || '');
+        const lordId = String(row[columnMapping.idMember] || '').trim();
         const internalId = memberMap.get(lordId);
         
         if (!internalId) return;
@@ -134,6 +143,26 @@ export const ImportSeasonModal = ({ isOpen, onClose, loggedInUser }: ImportSeaso
             deads: deadAmount // Using 'deads' as per user schema
           });
         }
+
+        // Heal
+        const healAmount = Number(row[columnMapping.heals] || 0);
+        if (healAmount !== 0) {
+          healRecords.push({
+            idCheckRecord,
+            idMember: internalId,
+            heals: healAmount
+          });
+        }
+
+        // Kill
+        const killAmount = Number(row[columnMapping.kills] || 0);
+        if (killAmount !== 0) {
+          killRecords.push({
+            idCheckRecord,
+            idMember: internalId,
+            kills: killAmount
+          });
+        }
       });
 
       // Insert into Supabase
@@ -152,7 +181,18 @@ export const ImportSeasonModal = ({ isOpen, onClose, loggedInUser }: ImportSeaso
         if (error) throw error;
       }
 
+      if (healRecords.length > 0) {
+        const { error } = await supabase.from('CheckHeal').insert(healRecords);
+        if (error) throw error;
+      }
+
+      if (killRecords.length > 0) {
+        const { error } = await supabase.from('CheckKill').insert(killRecords);
+        if (error) throw error;
+      }
+
       toast.success(`Successfully imported ${jsonData.length} records for "${nameRecord}"`);
+      if (onImportSuccess) onImportSuccess();
       onClose();
       // Reset state
       setStep(1);
@@ -306,6 +346,8 @@ export const ImportSeasonModal = ({ isOpen, onClose, loggedInUser }: ImportSeaso
                             if (key === 'merits') return lowerCol.includes('merit');
                             if (key === 'mana') return lowerCol.includes('mana');
                             if (key === 'deads') return lowerCol.includes('dead');
+                            if (key === 'heals') return lowerCol.includes('heal');
+                            if (key === 'kills') return lowerCol.includes('kill');
                             return true;
                           });
                           return (
