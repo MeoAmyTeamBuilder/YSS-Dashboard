@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Users, Database, Shield, Info, ChevronRight, Upload, RefreshCw, UserPlus, BookOpen, X, Edit2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Users, Database, Shield, Info, ChevronRight, Upload, RefreshCw, UserPlus, BookOpen, X, Edit2, History } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { UpdateLeadershipModal } from './UpdateLeadershipModal';
 import { UpdateAllianceInfoModal } from './UpdateAllianceInfoModal';
@@ -8,6 +8,10 @@ import { AddAccountModal } from './AddAccountModal';
 import { ImportSeasonModal } from './ImportSeasonModal';
 import { SyncMembersModal } from './SyncMembersModal';
 import { ManageRecordsModal } from './ManageRecordsModal';
+import { UpdateHistoryLogModal } from './UpdateHistoryLogModal';
+import { supabase } from '../lib/supabase';
+import { format } from 'date-fns';
+import { logUpdateAction } from '../lib/updates';
 
 const SETTING_CARDS = [
   {
@@ -83,7 +87,35 @@ export const SettingsView = ({ loggedInUser, onLeadershipUpdated, onSetPowerThre
   const [isImportSeasonModalOpen, setIsImportSeasonModalOpen] = useState(false);
   const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
   const [isManageRecordsModalOpen, setIsManageRecordsModalOpen] = useState(false);
+  const [isHistoryLogModalOpen, setIsHistoryLogModalOpen] = useState(false);
   const [powerInputValue, setPowerInputValue] = useState('60000000');
+  const [latestUpdate, setLatestUpdate] = useState<{ idUser: string, actionUpdate: string, dateUpdate: string } | null>(null);
+
+  useEffect(() => {
+    fetchLatestUpdate();
+  }, []);
+
+  async function fetchLatestUpdate() {
+    try {
+      const { data, error } = await supabase
+        .from('CheckUpdateDataByUser')
+        .select('*')
+        .order('dateUpdate', { ascending: false })
+        .order('id', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (error) {
+        console.error('Error fetching latest update:', error);
+        if (error.message.includes('permission denied')) {
+          console.warn('RLS Policy might be missing for CheckUpdateDataByUser table');
+        }
+      }
+      if (data) setLatestUpdate(data);
+    } catch (err) {
+      console.error('Failed to fetch latest update:', err);
+    }
+  }
 
   return (
     <div className="h-full flex flex-col gap-8">
@@ -157,11 +189,23 @@ export const SettingsView = ({ loggedInUser, onLeadershipUpdated, onSetPowerThre
           </div>
           <div>
             <h4 className="text-sm font-bold text-white">System Auto-Sync Active</h4>
-            <p className="text-[10px] text-slate-500 uppercase tracking-wider">Next synchronization in 4 hours 12 minutes</p>
+            <p className="text-[10px] text-slate-500 uppercase tracking-wider">
+              {latestUpdate ? (
+                <>
+                  <span className="text-frost-400 font-bold">{latestUpdate.idUser}</span> performed <span className="text-white font-bold">{latestUpdate.actionUpdate}</span> on {format(new Date(latestUpdate.dateUpdate), 'MMM dd, HH:mm')}
+                </>
+              ) : (
+                'No recent synchronization activity'
+              )}
+            </p>
           </div>
         </div>
-        <button className="px-6 py-2.5 bg-frost-500 hover:bg-frost-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-frost-500/20 transition-all">
-          Force Global Refresh
+        <button 
+          onClick={() => setIsHistoryLogModalOpen(true)}
+          className="px-6 py-2.5 bg-frost-500 hover:bg-frost-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-frost-500/20 transition-all flex items-center gap-2"
+        >
+          <History size={14} />
+          History Update
         </button>
       </div>
 
@@ -195,14 +239,20 @@ export const SettingsView = ({ loggedInUser, onLeadershipUpdated, onSetPowerThre
       <ImportSeasonModal
         isOpen={isImportSeasonModalOpen}
         onClose={() => setIsImportSeasonModalOpen(false)}
-        onImportSuccess={onLeadershipUpdated}
+        onImportSuccess={() => {
+          onLeadershipUpdated();
+          fetchLatestUpdate();
+        }}
         loggedInUser={loggedInUser}
       />
 
       <SyncMembersModal
         isOpen={isSyncModalOpen}
         onClose={() => setIsSyncModalOpen(false)}
-        onSuccess={onLeadershipUpdated}
+        onSuccess={() => {
+          onLeadershipUpdated();
+          fetchLatestUpdate();
+        }}
         loggedInUser={loggedInUser}
       />
 
@@ -211,6 +261,11 @@ export const SettingsView = ({ loggedInUser, onLeadershipUpdated, onSetPowerThre
         onClose={() => setIsManageRecordsModalOpen(false)}
         onRecordsUpdated={onLeadershipUpdated}
         loggedInUser={loggedInUser}
+      />
+
+      <UpdateHistoryLogModal
+        isOpen={isHistoryLogModalOpen}
+        onClose={() => setIsHistoryLogModalOpen(false)}
       />
     </div>
   );

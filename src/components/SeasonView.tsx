@@ -71,12 +71,13 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
       if (healsRes.error) console.error('Error fetching heals:', healsRes.error);
       if (killsRes.error) console.error('Error fetching kills:', killsRes.error);
 
-      const dataMap = new Map<number, JoinedRecord>();
+      const dataMap = new Map<string, JoinedRecord>();
       members.forEach(m => {
-        if (m.id) {
-          dataMap.set(m.id, {
-            idMember: m.id,
-            lordId: m.idMember,
+        if (m.idMember) {
+          const normalizedId = String(Number(m.idMember));
+          dataMap.set(normalizedId, {
+            idMember: Number(m.idMember),
+            lordId: m.idMember || '',
             nameMember: m.nameMember,
             merits: 0,
             mana: 0,
@@ -89,41 +90,49 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
 
       if (meritsRes.data) {
         meritsRes.data.forEach(item => {
-          const record = dataMap.get(item.idMember);
+          const record = dataMap.get(String(item.idMember));
           if (record) record.merits = item.mertits;
         });
       }
 
       if (manaRes.data) {
         manaRes.data.forEach(item => {
-          const record = dataMap.get(item.idMember);
-          if (record) record.mana = item.deads;
+          const record = dataMap.get(String(item.idMember));
+          if (record) record.mana = item.manas;
         });
       }
 
       if (deadsRes.data) {
         deadsRes.data.forEach(item => {
-          const record = dataMap.get(item.idMember);
+          const record = dataMap.get(String(item.idMember));
           if (record) record.deads = item.deads;
         });
       }
 
       if (healsRes.data) {
         healsRes.data.forEach(item => {
-          const record = dataMap.get(item.idMember);
+          const record = dataMap.get(String(item.idMember));
           if (record) record.heals = item.heals;
         });
       }
 
       if (killsRes.data) {
         killsRes.data.forEach(item => {
-          const record = dataMap.get(item.idMember);
+          const record = dataMap.get(String(item.idMember));
           if (record) record.kills = item.kills;
         });
       }
 
+      const activeMemberIds = new Set([
+        ...(meritsRes.data || []).map(d => String(d.idMember)),
+        ...(manaRes.data || []).map(d => String(d.idMember)),
+        ...(deadsRes.data || []).map(d => String(d.idMember)),
+        ...(healsRes.data || []).map(d => String(d.idMember)),
+        ...(killsRes.data || []).map(d => String(d.idMember))
+      ]);
+
       const filtered = Array.from(dataMap.values()).filter(r => 
-        r.merits !== 0 || r.mana !== 0 || r.deads !== 0 || r.heals !== 0 || r.kills !== 0
+        activeMemberIds.has(String(r.idMember))
       );
 
       console.log(`Found ${filtered.length} active records for this season.`);
@@ -366,7 +375,7 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
             <tbody className="divide-y divide-white/5">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="p-24 text-center">
+                  <td colSpan={7} className="p-24 text-center">
                     <div className="flex flex-col items-center gap-6">
                       <div className="relative w-12 h-12">
                         <div className="absolute inset-0 border-2 border-frost-500/20 rounded-full" />
@@ -378,7 +387,7 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
                 </tr>
               ) : filteredAndSortedData.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-24 text-center">
+                  <td colSpan={7} className="p-24 text-center">
                     <div className="flex flex-col items-center gap-4 opacity-40">
                       <Database size={48} className="text-slate-600" />
                       <p className="text-sm text-slate-400 font-medium">No activity data found for this period.</p>

@@ -8,13 +8,16 @@ interface PowerChartProps {
 
 export const PowerChart = ({ members }: PowerChartProps) => {
   const ranges = [
-    { label: '60-70M', min: 60000000, max: 70000000 },
-    { label: '70-80M', min: 70000000, max: 80000000 },
+    { label: '60-80M', min: 60000000, max: 80000000 },
     { label: '80-90M', min: 80000000, max: 90000000 },
     { label: '90-100M', min: 90000000, max: 100000000 },
-    { label: '100-125M', min: 100000000, max: 125000000 },
-    { label: '125-150M', min: 125000000, max: 150000000 },
-    { label: '>150M', min: 150000000, max: Infinity },
+    { label: '100-110M', min: 100000000, max: 110000000 },
+    { label: '110-125M', min: 110000000, max: 125000000 },
+    { label: '125-135M', min: 125000000, max: 135000000 },
+    { label: '135-150M', min: 135000000, max: 150000000 },
+    { label: '150-180M', min: 150000000, max: 180000000 },
+    { label: '180-200M', min: 180000000, max: 200000000 },
+    { label: '>200M', min: 200000000, max: Infinity },
   ];
 
   const data = ranges.map(range => ({

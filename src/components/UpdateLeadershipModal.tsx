@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Search, User, Shield, Crown, Check, ChevronRight, Trash2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
+import { logUpdateAction } from '../lib/updates';
 import { AllianceMember, User as UserType } from '../types';
 import { checkPermission } from '../lib/permissions';
 
@@ -105,6 +106,11 @@ export const UpdateLeadershipModal = ({ isOpen, onClose, onLeadershipUpdated, lo
           .update({ roleMember: selectedRole, nameMember: selectedMember.nameMember })
           .eq('idMember', selectedMember.idMember);
         if (error) throw error;
+        
+        if (loggedInUser) {
+          await logUpdateAction(loggedInUser.fullNameUser || loggedInUser.nameUser, `Updated role for ${selectedMember.nameMember}`);
+        }
+        
         toast.success(`Updated role for ${selectedMember.nameMember}`);
       } else {
         // Insert new
@@ -116,6 +122,11 @@ export const UpdateLeadershipModal = ({ isOpen, onClose, onLeadershipUpdated, lo
             roleMember: selectedRole
           });
         if (error) throw error;
+
+        if (loggedInUser) {
+          await logUpdateAction(loggedInUser.fullNameUser || loggedInUser.nameUser, `Assigned role to ${selectedMember.nameMember}`);
+        }
+
         toast.success(`Assigned role to ${selectedMember.nameMember}`);
       }
 
@@ -140,6 +151,10 @@ export const UpdateLeadershipModal = ({ isOpen, onClose, onLeadershipUpdated, lo
         .eq('idMember', selectedMember.idMember);
       
       if (error) throw error;
+      
+      if (loggedInUser) {
+        await logUpdateAction(loggedInUser.fullNameUser || loggedInUser.nameUser, `Removed role from ${selectedMember.nameMember}`);
+      }
       
       toast.success(`Removed role from ${selectedMember.nameMember}`);
       onLeadershipUpdated();

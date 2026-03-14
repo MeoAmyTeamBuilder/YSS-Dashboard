@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Crown, Swords, Shield } from 'lucide-react';
+import { X, Crown, Swords, Shield, User } from 'lucide-react';
 import { AllianceMember } from '../types';
 
 interface LeaderModalProps {
@@ -59,7 +59,7 @@ export const LeaderModal = ({ isOpen, onClose, members }: LeaderModalProps) => {
                       <div key={king.idMember} className="bg-white/5 border border-amber-500/30 rounded-2xl p-4 flex items-center gap-4 relative overflow-hidden group">
                         <div className="absolute inset-0 bg-gradient-to-br from-amber-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                         <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-900/40 flex items-center justify-center text-amber-400 font-bold text-lg border border-amber-500/30 flex-shrink-0">
-                          {king.nameMember.charAt(0)}
+                          <User size={24} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-bold text-white truncate">{king.nameMember}</div>
@@ -89,7 +89,7 @@ export const LeaderModal = ({ isOpen, onClose, members }: LeaderModalProps) => {
                       <div key={leader.idMember} className="bg-white/5 border border-emerald-500/30 rounded-2xl p-4 flex items-center gap-4 relative overflow-hidden group">
                         <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                         <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-900/40 flex items-center justify-center text-emerald-400 font-bold text-lg border border-emerald-500/30 flex-shrink-0">
-                          {leader.nameMember.charAt(0)}
+                          <User size={24} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="text-sm font-bold text-white truncate">{leader.nameMember}</div>

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Save, Image as ImageIcon, Link as LinkIcon, Info as InfoIcon, Globe, Clock, Target, Languages, MessageSquare, Hash, Shield } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
+import { logUpdateAction } from '../lib/updates';
 import { AllianceInformation, User } from '../types';
 import { checkPermission } from '../lib/permissions';
 import { getDirectDriveUrl } from '../lib/utils';
@@ -82,6 +83,10 @@ export const UpdateAllianceInfoModal = ({ isOpen, onClose, onAllianceInfoUpdated
       if (error) {
         console.error('Supabase upsert error:', error);
         throw error;
+      }
+
+      if (loggedInUser) {
+        await logUpdateAction(loggedInUser.fullNameUser || loggedInUser.nameUser, 'Updated Alliance Info');
       }
 
       toast.success('Alliance info updated successfully');

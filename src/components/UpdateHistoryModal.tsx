@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Save, Plus, Edit2, Trash2, Calendar, Flag, AlignLeft, Type, BookOpen } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
+import { logUpdateAction } from '../lib/updates';
 import { HistoryKingdom, User } from '../types';
 import { checkPermission } from '../lib/permissions';
 
@@ -92,6 +93,11 @@ export const UpdateHistoryModal = ({ isOpen, onClose, onHistoryUpdated, loggedIn
           console.error('Supabase update error:', error);
           throw error;
         }
+
+        if (loggedInUser) {
+          await logUpdateAction(loggedInUser.fullNameUser || loggedInUser.nameUser, `Updated history: ${formData.titleHistory}`);
+        }
+
         toast.success('History updated successfully');
       } else {
         const { id, ...insertData } = formData;
@@ -102,6 +108,11 @@ export const UpdateHistoryModal = ({ isOpen, onClose, onHistoryUpdated, loggedIn
           console.error('Supabase insert error:', error);
           throw error;
         }
+
+        if (loggedInUser) {
+          await logUpdateAction(loggedInUser.fullNameUser || loggedInUser.nameUser, `Added history: ${formData.titleHistory}`);
+        }
+
         toast.success('History added successfully');
       }
 
@@ -127,6 +138,11 @@ export const UpdateHistoryModal = ({ isOpen, onClose, onHistoryUpdated, loggedIn
         .eq('id', id);
       if (error) throw error;
       
+      if (loggedInUser) {
+        const deletedHistory = histories.find(h => h.id === id);
+        await logUpdateAction(loggedInUser.fullNameUser || loggedInUser.nameUser, `Deleted history: ${deletedHistory?.titleHistory || id}`);
+      }
+
       toast.success('History deleted successfully');
       fetchHistories();
       onHistoryUpdated();

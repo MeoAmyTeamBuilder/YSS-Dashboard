@@ -35,9 +35,9 @@ export default function App() {
   const [checkRecords, setCheckRecords] = useState<any[]>([]);
   const [isChartModalOpen, setIsChartModalOpen] = useState(false);
 
-  async function fetchData() {
+  async function fetchData(background = false) {
     try {
-      setLoading(true);
+      if (!background) setLoading(true);
       
       // Fetch HistoryKingdom
       const { data: historyData } = await supabase
@@ -468,7 +468,7 @@ export default function App() {
           {activeTab === 'settings' && (
             <SettingsView 
               loggedInUser={loggedInUser}
-              onLeadershipUpdated={fetchData}
+              onLeadershipUpdated={() => fetchData(true)}
               onSetPowerThreshold={setPowerThreshold}
             />
           )}

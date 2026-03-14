@@ -38,7 +38,7 @@ export interface HistoryKingdom {
 export interface CheckMana {
   id?: number;
   idMember: number;
-  deads: number;
+  manas: number;
   idCheckRecord: number;
 }
 
@@ -74,6 +74,13 @@ export interface CheckRecord {
   id?: number;
   nameRecord: string;
   dateRecord: string;
+}
+
+export interface CheckUpdateDataByUser {
+  id?: number;
+  idUser: string;
+  dateUpdate: string;
+  actionUpdate: string;
 }
 
 export interface User {

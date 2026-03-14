@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Upload, Users, FileText, Check, AlertCircle, Zap, ChevronDown } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
+import { logUpdateAction } from '../lib/updates';
 import * as XLSX from 'xlsx';
 import { AllianceMember, User } from '../types';
 import { checkPermission } from '../lib/permissions';
@@ -135,12 +136,17 @@ export const SyncMembersModal = ({ isOpen, onClose, onSuccess, loggedInUser }: S
         throw new Error(`No members found matching the criteria (Power >= ${powerThreshold.toLocaleString()})`);
       }
 
-      // Clear and Insert
-      const { error: deleteError } = await supabase.from('Member').delete().neq('id', -1);
-      if (deleteError) throw deleteError;
+      // Sync using upsert to avoid breaking foreign key constraints with historical data
+      const { error: upsertError } = await supabase
+        .from('Member')
+        .upsert(processedMembers, { onConflict: 'idMember' });
+      
+      if (upsertError) throw upsertError;
 
-      const { error: insertError } = await supabase.from('Member').insert(processedMembers);
-      if (insertError) throw insertError;
+      // Log the action
+      if (loggedInUser) {
+        await logUpdateAction(loggedInUser.fullNameUser || loggedInUser.nameUser, 'Update Member List');
+      }
 
       toast.success(`Successfully synchronized ${processedMembers.length} members`);
       onSuccess();

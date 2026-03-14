@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Save, Plus, Edit2, Trash2, User, Shield, Lock, Users, Eye, EyeOff } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
+import { logUpdateAction } from '../lib/updates';
 import { User as UserType } from '../types';
 import { checkPermission } from '../lib/permissions';
 
@@ -89,6 +90,11 @@ export const AddAccountModal = ({ isOpen, onClose, loggedInUser }: AddAccountMod
           .update(formData)
           .eq('id', formData.id);
         if (error) throw error;
+
+        if (loggedInUser) {
+          await logUpdateAction(loggedInUser.fullNameUser || loggedInUser.nameUser, `Updated account: ${formData.nameUser}`);
+        }
+
         toast.success('User updated successfully');
       } else {
         if (!formData.passUser) {
@@ -100,6 +106,11 @@ export const AddAccountModal = ({ isOpen, onClose, loggedInUser }: AddAccountMod
           .from('User')
           .insert(formData);
         if (error) throw error;
+
+        if (loggedInUser) {
+          await logUpdateAction(loggedInUser.fullNameUser || loggedInUser.nameUser, `Added account: ${formData.nameUser}`);
+        }
+
         toast.success('User added successfully');
       }
 
@@ -124,6 +135,11 @@ export const AddAccountModal = ({ isOpen, onClose, loggedInUser }: AddAccountMod
         .eq('id', id);
       if (error) throw error;
       
+      if (loggedInUser) {
+        const deletedUser = users.find(u => u.id === id);
+        await logUpdateAction(loggedInUser.fullNameUser || loggedInUser.nameUser, `Deleted account: ${deletedUser?.nameUser || id}`);
+      }
+
       toast.success('User deleted successfully');
       fetchUsers();
     } catch (error) {

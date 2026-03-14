@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Upload, Database, FileText, Check, AlertCircle, ChevronDown } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { supabase } from '../lib/supabase';
+import { logUpdateAction } from '../lib/updates';
 import * as XLSX from 'xlsx';
 
 import { User } from '../types';
@@ -67,7 +68,7 @@ export const ImportSeasonModal = ({ isOpen, onClose, onImportSuccess, loggedInUs
     setIsProcessing(true);
 
     try {
-      // 0. Fetch all members to map idMember (string) to id (number)
+      // 0. Fetch all members to map idMember (string) to Number(idMember)
       const { data: members, error: membersError } = await supabase
         .from('Member')
         .select('id, idMember');
@@ -77,7 +78,7 @@ export const ImportSeasonModal = ({ isOpen, onClose, onImportSuccess, loggedInUs
       const memberMap = new Map<string, number>();
       members.forEach(m => {
         if (m.idMember) {
-          memberMap.set(String(m.idMember).trim(), m.id);
+          memberMap.set(String(m.idMember).trim().toLowerCase(), Number(m.idMember));
         }
       });
 
@@ -102,50 +103,69 @@ export const ImportSeasonModal = ({ isOpen, onClose, onImportSuccess, loggedInUs
         throw new Error('The file is empty');
       }
 
+      const hasMetricMapping = ['merits', 'mana', 'deads', 'heals', 'kills'].some(key => columnMapping[key as keyof typeof columnMapping] !== '');
+      if (!hasMetricMapping) {
+        throw new Error('Please map at least one metric column (Merits, Mana, Deads, Heals, or Kills) before importing.');
+      }
+
       const manaRecords: any[] = [];
       const mertitRecords: any[] = [];
       const deadRecords: any[] = [];
       const healRecords: any[] = [];
       const killRecords: any[] = [];
 
+      const parseNumber = (val: any) => {
+        if (!val) return 0;
+        if (typeof val === 'number') return val;
+        const str = String(val).replace(/,/g, '').trim();
+        const num = Number(str);
+        return isNaN(num) ? 0 : num;
+      };
+
+      let foundLordId = false;
       jsonData.forEach((row) => {
-        const lordId = String(row[columnMapping.idMember] || '').trim();
-        const internalId = memberMap.get(lordId);
+        let lordId = String(row['Lord ID'] || row.idMember || row['idMember'] || row['ID'] || '').trim();
+        if (lordId.endsWith('.0')) {
+          lordId = lordId.slice(0, -2);
+        }
+        if (lordId) foundLordId = true;
         
+        const internalId = memberMap.get(lordId.toLowerCase());
         if (!internalId) return;
 
         // Mana
-        const manaUsed = Number(row[columnMapping.mana] || 0);
+        const manaUsed = parseNumber(row[columnMapping.mana]);
         if (manaUsed !== 0) {
           manaRecords.push({
             idCheckRecord,
             idMember: internalId,
-            deads: manaUsed // Using 'deads' as per user schema for CheckMana
+            manas: manaUsed // Updated from 'deads' to 'manas'
           });
         }
 
-        // Mertit
-        const mertitAmount = Number(row[columnMapping.merits] || 0);
+        // Mertit (negative becomes 0)
+        let mertitAmount = parseNumber(row[columnMapping.merits]);
+        if (mertitAmount < 0) mertitAmount = 0;
         if (mertitAmount !== 0) {
           mertitRecords.push({
             idCheckRecord,
             idMember: internalId,
-            mertits: mertitAmount // Using 'mertits' as per user schema
+            mertits: mertitAmount
           });
         }
 
         // Dead
-        const deadAmount = Number(row[columnMapping.deads] || 0);
+        const deadAmount = parseNumber(row[columnMapping.deads]);
         if (deadAmount !== 0) {
           deadRecords.push({
             idCheckRecord,
             idMember: internalId,
-            deads: deadAmount // Using 'deads' as per user schema
+            deads: deadAmount
           });
         }
 
         // Heal
-        const healAmount = Number(row[columnMapping.heals] || 0);
+        const healAmount = parseNumber(row[columnMapping.heals]);
         if (healAmount !== 0) {
           healRecords.push({
             idCheckRecord,
@@ -155,7 +175,7 @@ export const ImportSeasonModal = ({ isOpen, onClose, onImportSuccess, loggedInUs
         }
 
         // Kill
-        const killAmount = Number(row[columnMapping.kills] || 0);
+        const killAmount = parseNumber(row[columnMapping.kills]);
         if (killAmount !== 0) {
           killRecords.push({
             idCheckRecord,
@@ -164,6 +184,14 @@ export const ImportSeasonModal = ({ isOpen, onClose, onImportSuccess, loggedInUs
           });
         }
       });
+
+      if (!foundLordId) {
+        throw new Error('Could not find Lord ID in the uploaded file. Ensure the column is named "Lord ID" or "idMember".');
+      }
+
+      if (manaRecords.length === 0 && mertitRecords.length === 0 && deadRecords.length === 0 && healRecords.length === 0 && killRecords.length === 0) {
+        throw new Error('No valid data found to import. Please check your column mapping and ensure Lord IDs match the member list.');
+      }
 
       // Insert into Supabase
       if (manaRecords.length > 0) {
@@ -189,6 +217,11 @@ export const ImportSeasonModal = ({ isOpen, onClose, onImportSuccess, loggedInUs
       if (killRecords.length > 0) {
         const { error } = await supabase.from('CheckKill').insert(killRecords);
         if (error) throw error;
+      }
+
+      // Log the action
+      if (loggedInUser) {
+        await logUpdateAction(loggedInUser.fullNameUser || loggedInUser.nameUser, 'Import Season Data');
       }
 
       toast.success(`Successfully imported ${jsonData.length} records for "${nameRecord}"`);
