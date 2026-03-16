@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Database, Shield, Info, ChevronRight, Upload, RefreshCw, UserPlus, BookOpen, X, Edit2, History, AlertTriangle, Zap } from 'lucide-react';
+import { Users, Database, Shield, Info, ChevronRight, Upload, RefreshCw, UserPlus, BookOpen, X, Edit2, History, AlertTriangle, Zap, FileSpreadsheet } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { UpdateLeadershipModal } from './UpdateLeadershipModal';
 import { UpdateAllianceInfoModal } from './UpdateAllianceInfoModal';
@@ -90,9 +90,10 @@ interface SettingsViewProps {
   loggedInUser: User | null;
   onLeadershipUpdated: () => void;
   onSetPowerThreshold?: (threshold: number) => void;
+  exportToExcel: () => void;
 }
 
-export const SettingsView = ({ loggedInUser, onLeadershipUpdated, onSetPowerThreshold }: SettingsViewProps) => {
+export const SettingsView = ({ loggedInUser, onLeadershipUpdated, onSetPowerThreshold, exportToExcel }: SettingsViewProps) => {
   const canManageAccounts = checkPermission(loggedInUser, ['1']);
   const filteredCards = SETTING_CARDS.filter(card => {
     if (card.id === 'add-account') return canManageAccounts;
@@ -156,6 +157,18 @@ export const SettingsView = ({ loggedInUser, onLeadershipUpdated, onSetPowerThre
                   >
                     <Edit2 size={12} />
                     {card.secondaryAction}
+                  </button>
+                )}
+                {card.id === 'manage-sign-gh' && (
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      exportToExcel();
+                    }}
+                    className="flex items-center gap-2 px-3 py-2 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-600/30 rounded-xl text-[10px] font-bold text-emerald-400 transition-all"
+                  >
+                    <FileSpreadsheet size={12} />
+                    Export Excel
                   </button>
                 )}
                 <button 

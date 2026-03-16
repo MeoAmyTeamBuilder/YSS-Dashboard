@@ -13,8 +13,8 @@ import { LeaderModal } from './components/LeaderModal';
 import { MemberViolationView } from './components/MemberViolationView';
 import { SignGHModal } from './components/SignGHModal';
 import { SignGHListModal } from './components/SignGHListModal';
-import { AllianceMember, AllianceInformation, User as UserType } from './types';
-import { Users, Zap, Shield, Trophy, Search, Plus, Filter, Upload, Crown, X, PieChart } from 'lucide-react';
+import { AllianceMember, AllianceInformation, User as UserType, SignGH } from './types';
+import { Users, Zap, Shield, Trophy, Search, Plus, Filter, Upload, Crown, X, PieChart, FileSpreadsheet } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { supabase } from './lib/supabase';
 import { getDirectDriveUrl, formatCompactNumber } from './lib/utils';
@@ -22,6 +22,7 @@ import * as XLSX from 'xlsx';
 
 export default function App() {
   const [members, setMembers] = useState<AllianceMember[]>([]);
+  const [signGHRegistrations, setSignGHRegistrations] = useState<SignGH[]>([]);
   const [allianceInfo, setAllianceInfo] = useState<AllianceInformation | null>(null);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -103,12 +104,42 @@ export default function App() {
       } else if (infoData && infoData.length > 0) {
         setAllianceInfo(infoData[0]);
       }
+
+      // Fetch SignGH
+      const { data: signGHData, error: signGHError } = await supabase
+        .from('SignGH')
+        .select('*');
+      
+      if (signGHError) {
+        console.error('Error fetching SignGH:', signGHError);
+      } else if (signGHData) {
+        setSignGHRegistrations(signGHData);
+      }
     } catch (err) {
       console.error('Error fetching data:', err);
     } finally {
       setLoading(false);
     }
   }
+
+  const exportToExcel = () => {
+    const approvedOnly = signGHRegistrations.filter(r => r.stateSign === 1);
+    if (signGHRegistrations.length === 0 || approvedOnly.length === 0) {
+      toast.error('Database dont have data');
+      return;
+    }
+    const data = approvedOnly.map(r => ({
+      ID: r.idMember,
+      Name: r.nameMember,
+      Speed: r.speedSign,
+      'Pow up': r.targetPow
+    }));
+
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Approved Registrations");
+    XLSX.writeFile(wb, "SignGH.xlsx");
+  };
 
   useEffect(() => {
     fetchData();
@@ -518,6 +549,7 @@ export default function App() {
               loggedInUser={loggedInUser}
               onLeadershipUpdated={() => fetchData(true)}
               onSetPowerThreshold={setPowerThreshold}
+              exportToExcel={exportToExcel}
             />
           )}
 

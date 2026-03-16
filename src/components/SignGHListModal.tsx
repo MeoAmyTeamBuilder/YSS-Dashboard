@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, User, Zap, Clock, Search, AlertCircle, CheckCircle2, XCircle, Filter } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { SignGH } from '../types';
+import * as XLSX from 'xlsx';
 
 interface SignGHListModalProps {
   isOpen: boolean;
