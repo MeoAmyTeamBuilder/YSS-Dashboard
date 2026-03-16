@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, History, User, Calendar, Activity, AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { CheckUpdateDataByUser } from '../types';
 import { format } from 'date-fns';
 
 interface UpdateHistoryLogModalProps {
@@ -11,40 +10,18 @@ interface UpdateHistoryLogModalProps {
 }
 
 export const UpdateHistoryLogModal = ({ isOpen, onClose }: UpdateHistoryLogModalProps) => {
-  const [logs, setLogs] = useState<CheckUpdateDataByUser[]>([]);
+  const [logs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isOpen) {
-      fetchLogs();
-    }
+    // fetchLogs();
+    setLoading(false);
+    setError('Update history logging is currently disabled.');
   }, [isOpen]);
 
   async function fetchLogs() {
-    try {
-      setLoading(true);
-      setError(null);
-      const { data, error: fetchError } = await supabase
-        .from('CheckUpdateDataByUser')
-        .select('*')
-        .order('dateUpdate', { ascending: false })
-        .order('id', { ascending: false });
-      
-      if (fetchError) throw fetchError;
-      if (data) setLogs(data);
-    } catch (err: any) {
-      console.error('Error fetching update logs:', err);
-      if (err.code === '42P01') {
-        setError('Table "CheckUpdateDataByUser" does not exist in the database. Please check your Supabase schema.');
-      } else if (err.message?.includes('permission denied')) {
-        setError('Permission denied. Please check RLS policies for "CheckUpdateDataByUser" table.');
-      } else {
-        setError(err.message || 'Failed to fetch update logs');
-      }
-    } finally {
-      setLoading(false);
-    }
+    // Disabled
   }
 
   return (

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, Shield, Trophy, TrendingUp, Settings, LogOut, LogIn, LayoutDashboard, Menu, X, Calendar } from 'lucide-react';
+import { Users, Shield, Trophy, TrendingUp, Settings, LogOut, LogIn, LayoutDashboard, Menu, X, Calendar, AlertTriangle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface SidebarItemProps {
@@ -109,6 +109,13 @@ export const Sidebar = ({ activeTab, setActiveTab, isLoggedIn, loggedInUser, onL
               label="Ranking" 
               active={activeTab === 'ranking'} 
               onClick={() => handleTabClick('ranking')}
+            />
+            <SidebarItem 
+              icon={AlertTriangle} 
+              label="Member Violent" 
+              active={activeTab === 'violations'}
+              variant="danger"
+              onClick={() => handleTabClick('violations')}
             />
             {canAccessSettings && (
               <>

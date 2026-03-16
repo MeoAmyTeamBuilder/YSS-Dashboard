@@ -10,6 +10,9 @@ import { SettingsView } from './components/SettingsView';
 import { SeasonView } from './components/SeasonView';
 import { LoginModal } from './components/LoginModal';
 import { LeaderModal } from './components/LeaderModal';
+import { MemberViolationView } from './components/MemberViolationView';
+import { SignGHModal } from './components/SignGHModal';
+import { SignGHListModal } from './components/SignGHListModal';
 import { AllianceMember, AllianceInformation, User as UserType } from './types';
 import { Users, Zap, Shield, Trophy, Search, Plus, Filter, Upload, Crown, X, PieChart } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -28,6 +31,8 @@ export default function App() {
   const [loggedInUser, setLoggedInUser] = useState<UserType | null>(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isLeaderModalOpen, setIsLeaderModalOpen] = useState(false);
+  const [isSignGHModalOpen, setIsSignGHModalOpen] = useState(false);
+  const [isSignGHListModalOpen, setIsSignGHListModalOpen] = useState(false);
   const [sortBy, setSortBy] = useState<'power' | 'mana' | 'dead' | 'healed'>('power');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [powerThreshold, setPowerThreshold] = useState<number>(60000000);
@@ -184,6 +189,7 @@ export default function App() {
             {activeTab === 'overview' ? 'Overview' : 
              activeTab === 'members' ? 'Members' : 
              activeTab === 'ranking' ? 'Ranking' : 
+             activeTab === 'violations' ? 'Member Violations' :
              activeTab === 'activity' ? (
                <>
                  Season{' '}
@@ -216,6 +222,7 @@ export default function App() {
             ) : 
              activeTab === 'members' ? `Manage and track the performance of warriors.` : 
              activeTab === 'ranking' ? `View the competitive standings of members.` : 
+             activeTab === 'violations' ? `List of members who have violated alliance rules.` :
              activeTab === 'activity' ? `Track and analyze historical performance data for the current season.` :
              'Access alliance features and configurations.'}
           </p>
@@ -294,13 +301,42 @@ export default function App() {
                       </div>
                     </div>
 
-                    <div className="hidden lg:block mt-6 pt-4 border-t border-white/10 flex-shrink-0 space-y-3">
+                    <div className="mt-6 pt-4 border-t border-white/10 flex-shrink-0 space-y-3">
                       <div className="grid grid-cols-2 gap-3">
-                        <a href={allianceInfo?.zaloLink} target="_blank" rel="noreferrer" className="p-3 rounded-xl bg-blue-200 text-blue-900 border border-blue-300 text-center text-sm font-bold hover:bg-blue-600 hover:text-white transition-all">Zalo</a>
-                        <a href={allianceInfo?.discordLink} target="_blank" rel="noreferrer" className="p-3 rounded-xl bg-purple-200 text-purple-900 border border-purple-300 text-center text-sm font-bold hover:bg-purple-600 hover:text-white transition-all">Discord</a>
+                        <a 
+                          href={allianceInfo?.zaloLink} 
+                          target="_blank" 
+                          rel="noreferrer" 
+                          onClick={(e) => e.stopPropagation()}
+                          className="p-3 rounded-xl bg-blue-200 text-blue-900 border border-blue-300 text-center text-sm font-bold hover:bg-blue-600 hover:text-white transition-all"
+                        >
+                          Zalo
+                        </a>
+                        <a 
+                          href={allianceInfo?.discordLink} 
+                          target="_blank" 
+                          rel="noreferrer" 
+                          onClick={(e) => e.stopPropagation()}
+                          className="p-3 rounded-xl bg-purple-200 text-purple-900 border border-purple-300 text-center text-sm font-bold hover:bg-purple-600 hover:text-white transition-all"
+                        >
+                          Discord
+                        </a>
                       </div>
                       <button 
-                        onClick={() => setIsProfileModalOpen(true)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsSignGHModalOpen(true);
+                        }}
+                        className="w-full py-3 bg-blue-400 hover:bg-blue-500 text-white rounded-xl text-sm tracking-widest transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20"
+                      >
+                        <Zap size={18} />
+                        Sign top GH
+                      </button>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsProfileModalOpen(true);
+                        }}
                         className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-sm font-bold text-white transition-all"
                       >
                         View Alliance Profile
@@ -444,6 +480,14 @@ export default function App() {
                     <Crown size={16} />
                     <span className="hidden sm:inline">List Leader</span>
                   </button>
+
+                  <button 
+                    onClick={() => setIsSignGHListModalOpen(true)}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 border border-yellow-500/30 rounded-xl text-xs font-bold shadow-lg shadow-yellow-500/10 transition-all whitespace-nowrap"
+                  >
+                    <Zap size={16} />
+                    <span className="hidden sm:inline">List Member GH</span>
+                  </button>
                 </div>
               </div>
 
@@ -465,6 +509,10 @@ export default function App() {
             <RankingView members={members} />
           )}
 
+          {activeTab === 'violations' && (
+            <MemberViolationView />
+          )}
+
           {activeTab === 'settings' && (
             <SettingsView 
               loggedInUser={loggedInUser}
@@ -473,7 +521,7 @@ export default function App() {
             />
           )}
 
-          {!['overview', 'members', 'ranking', 'settings', 'activity'].includes(activeTab) && (
+          {!['overview', 'members', 'ranking', 'settings', 'activity', 'violations'].includes(activeTab) && (
             <div className="flex flex-col items-center justify-center py-20 text-center h-full">
               <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mb-6 border border-white/10">
                 <Shield className="text-frost-500" size={40} />
@@ -503,6 +551,16 @@ export default function App() {
         isOpen={isLeaderModalOpen}
         onClose={() => setIsLeaderModalOpen(false)}
         members={members}
+      />
+
+      <SignGHModal 
+        isOpen={isSignGHModalOpen}
+        onClose={() => setIsSignGHModalOpen(false)}
+      />
+
+      <SignGHListModal 
+        isOpen={isSignGHListModalOpen}
+        onClose={() => setIsSignGHListModalOpen(false)}
       />
 
       <AnimatePresence>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Database, Shield, Info, ChevronRight, Upload, RefreshCw, UserPlus, BookOpen, X, Edit2, History } from 'lucide-react';
+import { Users, Database, Shield, Info, ChevronRight, Upload, RefreshCw, UserPlus, BookOpen, X, Edit2, History, AlertTriangle, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { UpdateLeadershipModal } from './UpdateLeadershipModal';
 import { UpdateAllianceInfoModal } from './UpdateAllianceInfoModal';
@@ -9,6 +9,8 @@ import { ImportSeasonModal } from './ImportSeasonModal';
 import { SyncMembersModal } from './SyncMembersModal';
 import { ManageRecordsModal } from './ManageRecordsModal';
 import { UpdateHistoryLogModal } from './UpdateHistoryLogModal';
+import { ManageViolationsModal } from './ManageViolationsModal';
+import { ManageSignGHModal } from './ManageSignGHModal';
 import { supabase } from '../lib/supabase';
 import { format } from 'date-fns';
 import { logUpdateAction } from '../lib/updates';
@@ -62,6 +64,22 @@ const SETTING_CARDS = [
     icon: UserPlus,
     color: 'text-blue-400',
     action: 'Manage Accounts'
+  },
+  {
+    id: 'manage-violations',
+    title: 'Member Violation Management',
+    description: 'Track and manage member violations, warnings, and disciplinary actions.',
+    icon: AlertTriangle,
+    color: 'text-red-400',
+    action: 'Manage Violations'
+  },
+  {
+    id: 'manage-sign-gh',
+    title: 'Manage Sign Top GH',
+    description: 'Review and approve member registrations for the Great Hall ranking.',
+    icon: Zap,
+    color: 'text-yellow-400',
+    action: 'Manage Sign GH'
   }
 ];
 
@@ -88,34 +106,13 @@ export const SettingsView = ({ loggedInUser, onLeadershipUpdated, onSetPowerThre
   const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
   const [isManageRecordsModalOpen, setIsManageRecordsModalOpen] = useState(false);
   const [isHistoryLogModalOpen, setIsHistoryLogModalOpen] = useState(false);
+  const [isManageViolationsModalOpen, setIsManageViolationsModalOpen] = useState(false);
+  const [isManageSignGHModalOpen, setIsManageSignGHModalOpen] = useState(false);
   const [powerInputValue, setPowerInputValue] = useState('60000000');
-  const [latestUpdate, setLatestUpdate] = useState<{ idUser: string, actionUpdate: string, dateUpdate: string } | null>(null);
 
   useEffect(() => {
-    fetchLatestUpdate();
+    // fetchLatestUpdate();
   }, []);
-
-  async function fetchLatestUpdate() {
-    try {
-      const { data, error } = await supabase
-        .from('CheckUpdateDataByUser')
-        .select('*')
-        .order('dateUpdate', { ascending: false })
-        .order('id', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      
-      if (error) {
-        console.error('Error fetching latest update:', error);
-        if (error.message.includes('permission denied')) {
-          console.warn('RLS Policy might be missing for CheckUpdateDataByUser table');
-        }
-      }
-      if (data) setLatestUpdate(data);
-    } catch (err) {
-      console.error('Failed to fetch latest update:', err);
-    }
-  }
 
   return (
     <div className="h-full flex flex-col gap-8">
@@ -169,6 +166,8 @@ export const SettingsView = ({ loggedInUser, onLeadershipUpdated, onSetPowerThre
                     else if (card.id === 'update-alliance') setIsAllianceInfoModalOpen(true);
                     else if (card.id === 'update-history') setIsHistoryModalOpen(true);
                     else if (card.id === 'add-account') setIsAccountModalOpen(true);
+                    else if (card.id === 'manage-violations') setIsManageViolationsModalOpen(true);
+                    else if (card.id === 'manage-sign-gh') setIsManageSignGHModalOpen(true);
                   }}
                   className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[11px] font-bold text-white transition-all"
                 >
@@ -188,15 +187,9 @@ export const SettingsView = ({ loggedInUser, onLeadershipUpdated, onSetPowerThre
             <RefreshCw size={20} className="animate-spin-slow" />
           </div>
           <div>
-            <h4 className="text-sm font-bold text-white">System Auto-Sync Active</h4>
+            <h4 className="text-sm font-bold text-white">System Monitoring Active</h4>
             <p className="text-[10px] text-slate-500 uppercase tracking-wider">
-              {latestUpdate ? (
-                <>
-                  <span className="text-frost-400 font-bold">{latestUpdate.idUser}</span> performed <span className="text-white font-bold">{latestUpdate.actionUpdate}</span> on {format(new Date(latestUpdate.dateUpdate), 'MMM dd, HH:mm')}
-                </>
-              ) : (
-                'No recent synchronization activity'
-              )}
+              Real-time alliance management tools
             </p>
           </div>
         </div>
@@ -241,7 +234,6 @@ export const SettingsView = ({ loggedInUser, onLeadershipUpdated, onSetPowerThre
         onClose={() => setIsImportSeasonModalOpen(false)}
         onImportSuccess={() => {
           onLeadershipUpdated();
-          fetchLatestUpdate();
         }}
         loggedInUser={loggedInUser}
       />
@@ -251,7 +243,6 @@ export const SettingsView = ({ loggedInUser, onLeadershipUpdated, onSetPowerThre
         onClose={() => setIsSyncModalOpen(false)}
         onSuccess={() => {
           onLeadershipUpdated();
-          fetchLatestUpdate();
         }}
         loggedInUser={loggedInUser}
       />
@@ -266,6 +257,18 @@ export const SettingsView = ({ loggedInUser, onLeadershipUpdated, onSetPowerThre
       <UpdateHistoryLogModal
         isOpen={isHistoryLogModalOpen}
         onClose={() => setIsHistoryLogModalOpen(false)}
+      />
+
+      <ManageViolationsModal
+        isOpen={isManageViolationsModalOpen}
+        onClose={() => setIsManageViolationsModalOpen(false)}
+        loggedInUser={loggedInUser}
+      />
+
+      <ManageSignGHModal
+        isOpen={isManageSignGHModalOpen}
+        onClose={() => setIsManageSignGHModalOpen(false)}
+        loggedInUser={loggedInUser}
       />
     </div>
   );

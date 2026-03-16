@@ -76,19 +76,29 @@ export interface CheckRecord {
   dateRecord: string;
 }
 
-export interface CheckUpdateDataByUser {
-  id?: number;
-  idUser: string;
-  dateUpdate: string;
-  actionUpdate: string;
-}
-
 export interface User {
   id?: number;
   nameUser: string;
   passUser?: string;
   roleUser: string;
   fullNameUser?: string;
+}
+
+export interface MemberViolation {
+  id?: number;
+  idMember: string;
+  nameMembber: string;
+  stateMember: string;
+  describeMember: string;
+}
+
+export interface SignGH {
+  id?: number;
+  idMember: string;
+  nameMember: string;
+  speedSign: string;
+  targetPow: string;
+  stateSign: number;
 }
 
 export interface AllianceStats {

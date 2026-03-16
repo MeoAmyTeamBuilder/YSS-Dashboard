@@ -128,8 +128,6 @@ export const UpdateHistoryModal = ({ isOpen, onClose, onHistoryUpdated, loggedIn
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Are you sure you want to delete this history record?')) return;
-    
     setIsDeleting(id);
     try {
       const { error } = await supabase

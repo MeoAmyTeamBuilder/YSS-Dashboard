@@ -125,8 +125,6 @@ export const AddAccountModal = ({ isOpen, onClose, loggedInUser }: AddAccountMod
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) return;
-    
     setIsDeleting(id);
     try {
       const { error } = await supabase
