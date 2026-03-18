@@ -122,22 +122,44 @@ export default function App() {
     }
   }
 
-  const exportToExcel = () => {
-    const approvedOnly = signGHRegistrations.filter(r => r.stateSign === 1);
-    if (signGHRegistrations.length === 0 || approvedOnly.length === 0) {
+  const exportToExcel = async () => {
+    setLoading(true);
+    const { data: freshSignGHData, error } = await supabase
+      .from('SignGH')
+      .select('*');
+    setLoading(false);
+
+    if (error) {
+      console.error('Error fetching SignGH:', error);
+      toast.error('Error fetching data');
+      return;
+    }
+
+    const approvedOnly = freshSignGHData.filter(r => {
+      console.log('Record:', r);
+      return r.stateSign === 1 || r.stateSign === '1' || r.stateSign === true;
+    });
+    console.log('Approved records:', approvedOnly);
+    
+    // Export all data if available, even if not approved, but prioritize approved
+    const dataToExport = approvedOnly.length > 0 ? approvedOnly : freshSignGHData;
+    
+    if (freshSignGHData.length === 0) {
       toast.error('Database dont have data');
       return;
     }
-    const data = approvedOnly.map(r => ({
+    
+    const data = dataToExport.map(r => ({
       ID: r.idMember,
       Name: r.nameMember,
       Speed: r.speedSign,
-      'Pow up': r.targetPow
+      'Pow up': r.targetPow,
+      Status: r.stateSign === 1 || r.stateSign === '1' || r.stateSign === true ? 'Approved' : 'Pending'
     }));
 
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Approved Registrations");
+    XLSX.utils.book_append_sheet(wb, ws, "Registrations");
     XLSX.writeFile(wb, "SignGH.xlsx");
   };
 

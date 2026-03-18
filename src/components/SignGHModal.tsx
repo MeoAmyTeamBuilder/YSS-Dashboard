@@ -4,6 +4,7 @@ import { X, Send, Search, User, Zap, Clock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { AllianceMember } from '../types';
 import { toast } from 'react-hot-toast';
+import { PasswordModal } from './PasswordModal';
 
 interface SignGHModalProps {
   isOpen: boolean;
@@ -17,6 +18,7 @@ export const SignGHModal = ({ isOpen, onClose }: SignGHModalProps) => {
   const [speedSign, setSpeedSign] = useState('');
   const [targetPow, setTargetPow] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -42,19 +44,22 @@ export const SignGHModal = ({ isOpen, onClose }: SignGHModalProps) => {
     m.idMember.includes(searchTerm)
   ).slice(0, 5);
 
-  const handleSubmit = async () => {
+  const handleOpenPasswordModal = () => {
     if (!selectedMember || !speedSign || !targetPow) {
       toast.error('Please fill in all fields');
       return;
     }
+    setIsPasswordModalOpen(true);
+  };
 
+  const handleRegistration = async () => {
     setLoading(true);
     try {
       const { error } = await supabase
         .from('SignGH')
         .insert([{
-          idMember: selectedMember.idMember,
-          nameMember: selectedMember.nameMember,
+          idMember: selectedMember!.idMember,
+          nameMember: selectedMember!.nameMember,
           speedSign: `${speedSign} days`,
           targetPow,
           stateSign: 0
@@ -204,7 +209,7 @@ export const SignGHModal = ({ isOpen, onClose }: SignGHModalProps) => {
               </div>
 
               <button 
-                onClick={handleSubmit}
+                onClick={handleOpenPasswordModal}
                 disabled={loading}
                 className="w-full py-3 sm:py-4 bg-blue-400 hover:bg-blue-500 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm sm:text-base tracking-widest rounded-xl sm:rounded-2xl transition-all shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 sm:gap-3 mt-2 sm:mt-4 border-b-4 border-blue-700"
               >
@@ -219,6 +224,11 @@ export const SignGHModal = ({ isOpen, onClose }: SignGHModalProps) => {
               </button>
             </div>
           </motion.div>
+          <PasswordModal 
+            isOpen={isPasswordModalOpen} 
+            onClose={() => setIsPasswordModalOpen(false)} 
+            onSuccess={handleRegistration}
+          />
         </div>
       )}
     </AnimatePresence>

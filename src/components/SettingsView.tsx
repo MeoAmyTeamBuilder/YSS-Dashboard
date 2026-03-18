@@ -90,7 +90,7 @@ interface SettingsViewProps {
   loggedInUser: User | null;
   onLeadershipUpdated: () => void;
   onSetPowerThreshold?: (threshold: number) => void;
-  exportToExcel: () => void;
+  exportToExcel: () => Promise<void>;
 }
 
 export const SettingsView = ({ loggedInUser, onLeadershipUpdated, onSetPowerThreshold, exportToExcel }: SettingsViewProps) => {
