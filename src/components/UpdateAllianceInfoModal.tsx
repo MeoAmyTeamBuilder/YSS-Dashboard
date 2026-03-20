@@ -138,7 +138,7 @@ export const UpdateAllianceInfoModal = ({ isOpen, onClose, onAllianceInfoUpdated
             </div>
 
             {/* Content */}
-            <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
+            <div className="p-6 overflow-y-auto overflow-x-hidden scrollbar-hide flex-1">
               {isLoading ? (
                 <div className="flex justify-center py-12">
                   <div className="w-8 h-8 border-2 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin" />
@@ -314,7 +314,7 @@ export const UpdateAllianceInfoModal = ({ isOpen, onClose, onAllianceInfoUpdated
                       value={info.desAlliance || ''}
                       onChange={handleChange}
                       rows={4}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-colors resize-none"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-emerald-500/50 transition-colors resize-none scrollbar-hide"
                       placeholder="Enter a compelling description for your alliance..."
                     />
                   </div>

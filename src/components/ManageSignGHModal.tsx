@@ -312,7 +312,7 @@ export const ManageSignGHModal = ({ isOpen, onClose, loggedInUser }: ManageSignG
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col gap-4 sm:gap-6">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide p-4 sm:p-6 flex flex-col gap-4 sm:gap-6">
               {/* Filters */}
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                 <div className="relative flex-1">

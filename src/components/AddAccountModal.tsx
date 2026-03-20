@@ -194,7 +194,7 @@ export const AddAccountModal = ({ isOpen, onClose, loggedInUser }: AddAccountMod
             </div>
 
             {/* Content */}
-            <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
+            <div className="p-6 overflow-y-auto overflow-x-hidden scrollbar-hide flex-1">
               {isLoading ? (
                 <div className="flex justify-center py-12">
                   <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />

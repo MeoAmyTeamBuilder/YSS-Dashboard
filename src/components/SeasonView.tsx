@@ -530,7 +530,7 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
                 </button>
               </div>
 
-              <div className="overflow-y-auto custom-scrollbar pr-2 space-y-3 pb-4">
+              <div className="overflow-y-auto overflow-x-hidden scrollbar-hide pr-2 space-y-3 pb-4">
                 <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
                   <div className="flex items-center gap-3">
                     <Trophy size={16} className="text-amber-400" />

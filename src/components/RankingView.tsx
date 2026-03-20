@@ -50,7 +50,7 @@ const RankingModal = ({ isOpen, onClose, title, icon: Icon, members, valueKey, v
           <h3 className="text-xl font-bold text-white">{title}</h3>
         </div>
 
-        <div className="flex-1 overflow-y-auto scrollbar-hide">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide">
           <table className="w-full text-left">
             <thead>
               <tr className="text-[10px] uppercase tracking-wider text-slate-500">
@@ -115,7 +115,7 @@ export const RankingTable = ({ title, icon: Icon, members, valueKey, valueLabel,
           <h3 className="text-sm md:text-base font-bold text-white">{title}</h3>
         </div>
         
-        <div className={`${variant === 'card' ? 'flex' : 'hidden md:block'} flex-1 overflow-y-auto scrollbar-hide ${variant === 'card' ? 'flex-col justify-around space-y-1.5' : ''}`}>
+        <div className={`${variant === 'card' ? 'flex' : 'hidden md:block'} flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide ${variant === 'card' ? 'flex-col justify-around space-y-1.5' : ''}`}>
           {variant === 'table' ? (
             <table className="w-full text-left">
               <thead>

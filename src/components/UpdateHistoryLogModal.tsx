@@ -60,7 +60,7 @@ export const UpdateHistoryLogModal = ({ isOpen, onClose }: UpdateHistoryLogModal
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 scrollbar-hide">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden p-6 scrollbar-hide">
               {loading ? (
                 <div className="flex flex-col items-center justify-center py-20 gap-4">
                   <div className="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin" />

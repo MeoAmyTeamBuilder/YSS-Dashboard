@@ -182,7 +182,7 @@ export const SignGHListModal = ({ isOpen, onClose }: SignGHListModalProps) => {
               </div>
 
               {/* List */}
-              <div className="flex-1 overflow-y-auto pr-2 scrollbar-hide">
+              <div className="flex-1 overflow-y-auto overflow-x-hidden pr-2 scrollbar-hide">
                 {loading ? (
                   <div className="h-full flex flex-col items-center justify-center gap-4">
                     <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-yellow-500" />

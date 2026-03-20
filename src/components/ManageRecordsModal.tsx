@@ -332,7 +332,7 @@ export const ManageRecordsModal = ({ isOpen, onClose, onRecordsUpdated, loggedIn
               </button>
             </div>
 
-            <div className="p-6 overflow-y-auto scrollbar-hide">
+            <div className="p-6 overflow-y-auto overflow-x-hidden scrollbar-hide">
               {loading ? (
                 <div className="flex flex-col items-center justify-center py-20 gap-4">
                   <div className="w-10 h-10 border-2 border-frost-500 border-t-transparent rounded-full animate-spin" />

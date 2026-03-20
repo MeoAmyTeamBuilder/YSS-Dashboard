@@ -8,16 +8,18 @@ import { RankingView, RankingTable } from './components/RankingView';
 import { ProfileModal } from './components/ProfileModal';
 import { SettingsView } from './components/SettingsView';
 import { SeasonView } from './components/SeasonView';
+import { CalendarView } from './components/CalendarView';
 import { LoginModal } from './components/LoginModal';
 import { LeaderModal } from './components/LeaderModal';
 import { MemberViolationView } from './components/MemberViolationView';
 import { SignGHModal } from './components/SignGHModal';
 import { SignGHListModal } from './components/SignGHListModal';
-import { AllianceMember, AllianceInformation, User as UserType, SignGH } from './types';
-import { Users, Zap, Shield, Trophy, Search, Plus, Filter, Upload, Crown, X, PieChart, FileSpreadsheet } from 'lucide-react';
+import { AllianceMember, AllianceInformation, User as UserType, SignGH, CalendarKvk } from './types';
+import { Users, Zap, Shield, Trophy, Search, Plus, Filter, Upload, Crown, X, PieChart, FileSpreadsheet, Calendar } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { supabase } from './lib/supabase';
 import { getDirectDriveUrl, formatCompactNumber } from './lib/utils';
+import { format, addDays } from 'date-fns';
 import * as XLSX from 'xlsx';
 
 export default function App() {
@@ -40,6 +42,8 @@ export default function App() {
   const [historyKingdom, setHistoryKingdom] = useState<any>(null);
   const [checkRecords, setCheckRecords] = useState<any[]>([]);
   const [isChartModalOpen, setIsChartModalOpen] = useState(false);
+  const [todayEvent, setTodayEvent] = useState<CalendarKvk | null>(null);
+  const [nextEvent, setNextEvent] = useState<CalendarKvk | null>(null);
 
   async function fetchData(background = false) {
     try {
@@ -66,6 +70,38 @@ export default function App() {
       
       if (recordsData) {
         setCheckRecords(recordsData);
+      }
+
+      // Fetch Today's Event
+      const today = format(new Date(), 'yyyy-MM-dd');
+      const { data: eventData } = await supabase
+        .from('CalendarKvk')
+        .select('*')
+        .eq('activeDate', today)
+        .limit(1)
+        .single();
+      
+      if (eventData) {
+        setTodayEvent(eventData);
+      } else {
+        setTodayEvent(null);
+      }
+
+      // Fetch Next Event
+      const threeDaysLater = format(addDays(new Date(), 3), 'yyyy-MM-dd');
+      const { data: nextEventData } = await supabase
+        .from('CalendarKvk')
+        .select('*')
+        .gt('activeDate', today)
+        .lte('activeDate', threeDaysLater)
+        .order('activeDate', { ascending: true })
+        .limit(1)
+        .single();
+      
+      if (nextEventData) {
+        setNextEvent(nextEventData);
+      } else {
+        setNextEvent(null);
       }
 
       const { data: membersData, error: membersError } = await supabase
@@ -241,6 +277,7 @@ export default function App() {
           <h2 className="text-2xl font-bold text-white mb-0.5 capitalize">
             {activeTab === 'overview' ? 'Overview' : 
              activeTab === 'members' ? 'Members' : 
+             activeTab === 'calendar' ? 'Calendar' : 
              activeTab === 'ranking' ? 'Ranking' : 
              activeTab === 'violations' ? 'Member Violations' :
              activeTab === 'activity' ? (
@@ -274,6 +311,7 @@ export default function App() {
               </>
             ) : 
              activeTab === 'members' ? `Manage and track the performance of warriors.` : 
+             activeTab === 'calendar' ? `Track upcoming alliance events and KvK schedule.` : 
              activeTab === 'ranking' ? `View the competitive standings of members.` : 
              activeTab === 'violations' ? `List of members who have violated alliance rules.` :
              activeTab === 'activity' ? `Track and analyze historical performance data for the current season.` :
@@ -282,7 +320,7 @@ export default function App() {
         </div>
       </header>
 
-      <main className="flex-1 overflow-y-auto scrollbar-hide px-4 py-4 md:px-12 lg:px-16">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide px-4 py-4 md:px-12 lg:px-16">
         <motion.div 
           key={activeTab}
           initial={{ opacity: 0, scale: 0.98 }}
@@ -400,6 +438,51 @@ export default function App() {
                 
                 {/* Left Side: 3 Rows Layout */}
                 <div className="lg:col-span-2 flex flex-col gap-6 h-full min-h-0">
+                  {/* Events Container */}
+                  <div className="bg-white/5 border border-white/10 rounded-xl flex flex-col md:flex-row flex-shrink-0 divide-y md:divide-y-0 md:divide-x divide-white/10">
+                    {/* Today's Event */}
+                    <div className="flex items-center gap-3.5 flex-1 p-3 px-4">
+                      <div className={`p-2 rounded-xl ${todayEvent ? (todayEvent.importantDate === 1 ? 'bg-amber-500/20 text-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.2)]' : 'bg-emerald-500/20 text-emerald-400') : 'bg-blue-500/20 text-blue-400'}`}>
+                        <Calendar size={20} />
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Today's Event</h3>
+                        {!todayEvent ? (
+                          <span className="text-sm text-slate-500 font-medium">No events today</span>
+                        ) : (
+                          <span className={`text-sm font-bold whitespace-nowrap ${
+                            todayEvent.importantDate === 1 
+                              ? 'bg-gradient-to-r from-amber-500 to-yellow-200 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]' 
+                              : 'text-emerald-400'
+                          }`}>
+                            {todayEvent.timeDate} - {todayEvent.nameDate}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Next Event */}
+                    <div className="flex items-center gap-3.5 flex-1 p-3 px-4">
+                      <div className={`p-2 rounded-xl ${nextEvent ? (nextEvent.importantDate === 1 ? 'bg-amber-500/20 text-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.2)]' : 'bg-purple-500/20 text-purple-400') : 'bg-slate-500/20 text-slate-400'}`}>
+                        <Calendar size={20} />
+                      </div>
+                      <div className="flex flex-col gap-0.5">
+                        <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Next Event</h3>
+                        {!nextEvent ? (
+                          <span className="text-sm text-slate-500 font-medium">No upcoming events in 3 days</span>
+                        ) : (
+                          <span className={`text-sm font-bold whitespace-nowrap ${
+                            nextEvent.importantDate === 1 
+                              ? 'bg-gradient-to-r from-amber-500 to-yellow-200 bg-clip-text text-transparent drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]' 
+                              : 'text-purple-400'
+                          }`}>
+                            {nextEvent.activeDate.split('-').reverse().slice(0, 2).join('/')} • {nextEvent.timeDate} - {nextEvent.nameDate}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
                   {/* Row 1: Stat Cards */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-shrink-0">
                     <StatCard 
@@ -550,6 +633,10 @@ export default function App() {
             </div>
           )}
 
+          {activeTab === 'calendar' && (
+            <CalendarView />
+          )}
+
           {activeTab === 'activity' && (
             <SeasonView 
               members={members} 
@@ -575,7 +662,7 @@ export default function App() {
             />
           )}
 
-          {!['overview', 'members', 'ranking', 'settings', 'activity', 'violations'].includes(activeTab) && (
+          {!['overview', 'members', 'calendar', 'ranking', 'settings', 'activity', 'violations'].includes(activeTab) && (
             <div className="flex flex-col items-center justify-center py-20 text-center h-full">
               <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center mb-6 border border-white/10">
                 <Shield className="text-frost-500" size={40} />

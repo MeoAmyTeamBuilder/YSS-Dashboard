@@ -46,7 +46,7 @@ export const LeaderModal = ({ isOpen, onClose, members }: LeaderModalProps) => {
               <p className="text-slate-500 text-[10px] sm:text-xs uppercase tracking-widest font-bold">Command Leaders</p>
             </div>
 
-            <div className="overflow-y-auto pr-2 scrollbar-hide flex-1">
+            <div className="overflow-y-auto overflow-x-hidden pr-2 scrollbar-hide flex-1">
               <div className="space-y-6 sm:space-y-8">
                 {/* Kings Section */}
                 {kings.length > 0 && (

@@ -209,7 +209,7 @@ export const UpdateLeadershipModal = ({ isOpen, onClose, onLeadershipUpdated, lo
               </button>
             </div>
 
-            <div className="p-6 flex-1 overflow-y-auto">
+            <div className="p-6 flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide">
               {/* Search Bar */}
               <div className="relative mb-6">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">

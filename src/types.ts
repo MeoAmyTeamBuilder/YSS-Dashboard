@@ -101,6 +101,15 @@ export interface SignGH {
   stateSign: number;
 }
 
+export interface CalendarKvk {
+  id?: number;
+  activeDate: string;
+  nameDate: string;
+  timeDate: string;
+  desDate: string;
+  importantDate?: number;
+}
+
 export interface AllianceStats {
   totalMembers: number;
   totalPower: number;

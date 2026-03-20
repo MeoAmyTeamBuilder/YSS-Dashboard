@@ -97,7 +97,7 @@ export const ProfileModal = ({ isOpen, onClose }: ProfileModalProps) => {
             </div>
 
             {/* Right Side: Alliance Stats & History */}
-            <div className="flex-1 p-3 md:p-8 flex flex-col bg-white/[0.02] border-t md:border-t-0 md:border-l border-white/5 overflow-y-auto min-h-0">
+            <div className="flex-1 p-3 md:p-8 flex flex-col bg-white/[0.02] border-t md:border-t-0 md:border-l border-white/5 overflow-y-auto overflow-x-hidden scrollbar-hide min-h-0">
               {/* Current Season Section */}
               <div className="mb-3 md:mb-8 flex-shrink-0">
                 <div className="mb-1.5 md:mb-4">
@@ -127,7 +127,7 @@ export const ProfileModal = ({ isOpen, onClose }: ProfileModalProps) => {
                   <p className="text-slate-500 text-[9px] md:text-[11px]">The glorious path of our kingdom.</p>
                 </div>
 
-                <div className="flex-1 overflow-y-auto pr-1.5 md:pr-2 space-y-1.5 md:space-y-3 scrollbar-hide min-h-0">
+                <div className="flex-1 overflow-y-auto overflow-x-hidden pr-1.5 md:pr-2 space-y-1.5 md:space-y-3 scrollbar-hide min-h-0">
                   {history.filter(item => item.status === '1' || item.status === '2').map((item) => (
                     <div 
                       key={item.id} 

@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Users, Database, Shield, Info, ChevronRight, Upload, RefreshCw, UserPlus, BookOpen, X, Edit2, History, AlertTriangle, Zap, FileSpreadsheet } from 'lucide-react';
+import { Users, Database, Shield, Info, ChevronRight, Upload, RefreshCw, UserPlus, BookOpen, X, Edit2, History, AlertTriangle, Zap, FileSpreadsheet, Calendar } from 'lucide-react';
+import { CalendarKvkModal } from './CalendarKvkModal';
 import { motion, AnimatePresence } from 'motion/react';
+import { SeasonEventManagerModal } from './SeasonEventManagerModal';
+import { MembersManagerModal } from './MembersManagerModal';
+import { AllianceManagerModal } from './AllianceManagerModal';
 import { UpdateLeadershipModal } from './UpdateLeadershipModal';
 import { UpdateAllianceInfoModal } from './UpdateAllianceInfoModal';
 import { UpdateHistoryModal } from './UpdateHistoryModal';
@@ -17,45 +21,28 @@ import { logUpdateAction } from '../lib/updates';
 
 const SETTING_CARDS = [
   {
-    id: 'update-members',
-    title: 'Update Member List',
-    description: 'Synchronize and refresh the current alliance roster from game data.',
+    id: 'members-manager',
+    title: 'Members Manager',
+    description: 'Synchronize member list and manage member violations.',
     icon: Users,
     color: 'text-frost-400',
-    action: 'Sync Now'
+    action: 'Manage Members'
   },
   {
-    id: 'import-season',
-    title: 'Import Season Data',
-    description: 'Upload and process performance metrics for the current competitive season.',
-    icon: Database,
+    id: 'season-event-manager',
+    title: 'Season & Events',
+    description: 'Manage season data, Great Hall sign-ups, and calendar events.',
+    icon: Calendar,
     color: 'text-amber-400',
-    action: 'Import CSV',
-    secondaryAction: 'Edit Records'
+    action: 'Manage Season'
   },
   {
-    id: 'update-leadership',
-    title: 'Update Leadership Info',
-    description: 'Modify roles and permissions for alliance officers and leaders.',
+    id: 'alliance-manager',
+    title: 'Alliance Manager',
+    description: 'Manage alliance leadership, profile information, and history logs.',
     icon: Shield,
-    color: 'text-red-400',
-    action: 'Manage Roles'
-  },
-  {
-    id: 'update-alliance',
-    title: 'Update Alliance Info',
-    description: 'Edit alliance description, requirements, and public profile details.',
-    icon: Info,
-    color: 'text-emerald-400',
-    action: 'Edit Profile'
-  },
-  {
-    id: 'update-history',
-    title: 'Update History Alliance',
-    description: 'Manage the chronological history and major events of the alliance.',
-    icon: BookOpen,
-    color: 'text-purple-400',
-    action: 'Manage History'
+    color: 'text-frost-400',
+    action: 'Manage Alliance'
   },
   {
     id: 'add-account',
@@ -64,22 +51,6 @@ const SETTING_CARDS = [
     icon: UserPlus,
     color: 'text-blue-400',
     action: 'Manage Accounts'
-  },
-  {
-    id: 'manage-violations',
-    title: 'Member Violation Management',
-    description: 'Track and manage member violations, warnings, and disciplinary actions.',
-    icon: AlertTriangle,
-    color: 'text-red-400',
-    action: 'Manage Violations'
-  },
-  {
-    id: 'manage-sign-gh',
-    title: 'Manage Sign Top GH',
-    description: 'Review and approve member registrations for the Great Hall ranking.',
-    icon: Zap,
-    color: 'text-yellow-400',
-    action: 'Manage Sign GH'
   }
 ];
 
@@ -102,6 +73,9 @@ export const SettingsView = ({ loggedInUser, onLeadershipUpdated, onSetPowerThre
   const [isLeadershipModalOpen, setIsLeadershipModalOpen] = useState(false);
   const [isAllianceInfoModalOpen, setIsAllianceInfoModalOpen] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [isAllianceManagerModalOpen, setIsAllianceManagerModalOpen] = useState(false);
+  const [isMembersManagerModalOpen, setIsMembersManagerModalOpen] = useState(false);
+  const [isSeasonEventManagerModalOpen, setIsSeasonEventManagerModalOpen] = useState(false);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [isImportSeasonModalOpen, setIsImportSeasonModalOpen] = useState(false);
   const [isSyncModalOpen, setIsSyncModalOpen] = useState(false);
@@ -109,6 +83,7 @@ export const SettingsView = ({ loggedInUser, onLeadershipUpdated, onSetPowerThre
   const [isHistoryLogModalOpen, setIsHistoryLogModalOpen] = useState(false);
   const [isManageViolationsModalOpen, setIsManageViolationsModalOpen] = useState(false);
   const [isManageSignGHModalOpen, setIsManageSignGHModalOpen] = useState(false);
+  const [isCalendarKvkModalOpen, setIsCalendarKvkModalOpen] = useState(false);
   const [powerInputValue, setPowerInputValue] = useState('60000000');
 
   useEffect(() => {
@@ -147,44 +122,16 @@ export const SettingsView = ({ loggedInUser, onLeadershipUpdated, onSetPowerThre
               </p>
 
               <div className="flex items-center justify-end gap-2 pt-4 border-t border-white/5">
-                {card.secondaryAction && (
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (card.id === 'import-season') setIsManageRecordsModalOpen(true);
-                    }}
-                    className="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-bold text-slate-400 hover:text-white transition-all"
-                  >
-                    <Edit2 size={12} />
-                    {card.secondaryAction}
-                  </button>
-                )}
-                {card.id === 'manage-sign-gh' && (
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      exportToExcel();
-                    }}
-                    className="flex items-center gap-2 px-3 py-2 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-600/30 rounded-xl text-[10px] font-bold text-emerald-400 transition-all"
-                  >
-                    <FileSpreadsheet size={12} />
-                    Export Excel
-                  </button>
-                )}
                 <button 
                   onClick={() => {
-                    if (card.id === 'update-members') setIsSyncModalOpen(true);
-                    else if (card.id === 'import-season') setIsImportSeasonModalOpen(true);
-                    else if (card.id === 'update-leadership') setIsLeadershipModalOpen(true);
-                    else if (card.id === 'update-alliance') setIsAllianceInfoModalOpen(true);
-                    else if (card.id === 'update-history') setIsHistoryModalOpen(true);
+                    if (card.id === 'members-manager') setIsMembersManagerModalOpen(true);
+                    else if (card.id === 'season-event-manager') setIsSeasonEventManagerModalOpen(true);
+                    else if (card.id === 'alliance-manager') setIsAllianceManagerModalOpen(true);
                     else if (card.id === 'add-account') setIsAccountModalOpen(true);
-                    else if (card.id === 'manage-violations') setIsManageViolationsModalOpen(true);
-                    else if (card.id === 'manage-sign-gh') setIsManageSignGHModalOpen(true);
                   }}
                   className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[11px] font-bold text-white transition-all"
                 >
-                  {card.id === 'import-season' ? <Upload size={14} /> : <RefreshCw size={14} />}
+                  {card.id === 'season-event-manager' ? <Calendar size={14} /> : <RefreshCw size={14} />}
                   {card.action}
                 </button>
               </div>
@@ -214,6 +161,31 @@ export const SettingsView = ({ loggedInUser, onLeadershipUpdated, onSetPowerThre
           History Update
         </button>
       </div>
+
+      <AllianceManagerModal
+        isOpen={isAllianceManagerModalOpen}
+        onClose={() => setIsAllianceManagerModalOpen(false)}
+        onOpenLeadership={() => setIsLeadershipModalOpen(true)}
+        onOpenAllianceInfo={() => setIsAllianceInfoModalOpen(true)}
+        onOpenHistory={() => setIsHistoryModalOpen(true)}
+      />
+
+      <MembersManagerModal
+        isOpen={isMembersManagerModalOpen}
+        onClose={() => setIsMembersManagerModalOpen(false)}
+        onOpenUpdateMembers={() => setIsSyncModalOpen(true)}
+        onOpenManageViolations={() => setIsManageViolationsModalOpen(true)}
+      />
+
+      <SeasonEventManagerModal
+        isOpen={isSeasonEventManagerModalOpen}
+        onClose={() => setIsSeasonEventManagerModalOpen(false)}
+        onOpenImportSeason={() => setIsImportSeasonModalOpen(true)}
+        onOpenManageRecords={() => setIsManageRecordsModalOpen(true)}
+        onOpenManageSignGH={() => setIsManageSignGHModalOpen(true)}
+        onOpenManageCalendar={() => setIsCalendarKvkModalOpen(true)}
+        exportToExcel={exportToExcel}
+      />
 
       <UpdateLeadershipModal 
         isOpen={isLeadershipModalOpen} 
@@ -282,6 +254,11 @@ export const SettingsView = ({ loggedInUser, onLeadershipUpdated, onSetPowerThre
         isOpen={isManageSignGHModalOpen}
         onClose={() => setIsManageSignGHModalOpen(false)}
         loggedInUser={loggedInUser}
+      />
+
+      <CalendarKvkModal
+        isOpen={isCalendarKvkModalOpen}
+        onClose={() => setIsCalendarKvkModalOpen(false)}
       />
     </div>
   );

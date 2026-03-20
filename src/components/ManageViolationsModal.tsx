@@ -183,7 +183,7 @@ export const ManageViolationsModal = ({ isOpen, onClose, loggedInUser }: ManageV
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide p-6 flex flex-col gap-6">
               {/* Add/Edit Form */}
               {(isAdding || editingId !== null) ? (
                 <motion.div 

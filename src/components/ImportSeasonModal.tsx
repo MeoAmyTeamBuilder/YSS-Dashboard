@@ -277,7 +277,7 @@ export const ImportSeasonModal = ({ isOpen, onClose, onImportSuccess, loggedInUs
               </button>
             </div>
 
-            <div className="p-8">
+            <div className="p-8 overflow-y-auto overflow-x-hidden scrollbar-hide">
               {step === 1 ? (
                 <div className="space-y-6">
                   <div className="space-y-2">
