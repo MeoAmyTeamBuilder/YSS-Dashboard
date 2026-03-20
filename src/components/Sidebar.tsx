@@ -8,9 +8,10 @@ interface SidebarItemProps {
   active?: boolean;
   onClick?: () => void;
   variant?: 'default' | 'danger' | 'success';
+  tooltipPosition?: 'right' | 'top';
 }
 
-const SidebarItem = ({ icon: Icon, label, active, onClick, variant = 'default' }: SidebarItemProps) => {
+const SidebarItem = ({ icon: Icon, label, active, onClick, variant = 'default', tooltipPosition = 'right' }: SidebarItemProps) => {
   const variantStyles = {
     default: active 
       ? 'bg-frost-500 text-white shadow-lg shadow-frost-500/40' 
@@ -19,13 +20,17 @@ const SidebarItem = ({ icon: Icon, label, active, onClick, variant = 'default' }
     success: 'text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300'
   };
 
+  const tooltipStyles = tooltipPosition === 'right'
+    ? 'left-14'
+    : 'bottom-14 left-1/2 -translate-x-1/2';
+
   return (
     <div 
       onClick={onClick}
       className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all duration-200 group relative ${variantStyles[variant]}`}
     >
       <Icon size={22} />
-      <span className="absolute left-14 bg-frost-900 text-white px-3 py-1.5 rounded-lg text-sm font-medium opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap border border-white/10 z-50">
+      <span className={`absolute ${tooltipStyles} bg-frost-900 text-white px-3 py-1.5 rounded-lg text-sm font-medium opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap border border-white/10 z-50`}>
         {label}
       </span>
     </div>
@@ -60,15 +65,44 @@ export const Sidebar = ({ activeTab, setActiveTab, isLoggedIn, loggedInUser, onL
 
   return (
     <div className="fixed left-6 bottom-6 z-50 flex flex-col-reverse items-center gap-4">
-      {/* Main Toggle Button */}
-      <motion.button 
-        onClick={() => setIsOpen(!isOpen)}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        className="w-14 h-14 bg-frost-500 rounded-2xl flex items-center justify-center frost-glow text-white shadow-xl z-50"
-      >
-        {isOpen ? <X size={28} /> : <Shield size={28} />}
-      </motion.button>
+      {/* Main Toggle Button and Right-side buttons */}
+      <div className="relative flex items-center">
+        <motion.button 
+          onClick={() => setIsOpen(!isOpen)}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          className="w-14 h-14 bg-frost-500 rounded-2xl flex items-center justify-center frost-glow text-white shadow-xl z-50 relative"
+        >
+          {isOpen ? <X size={28} /> : <Shield size={28} />}
+        </motion.button>
+
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, x: -20, scale: 0.8 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: -20, scale: 0.8 }}
+              className="absolute left-full ml-4 flex items-center gap-2 frost-glass p-2 rounded-2xl shadow-2xl"
+            >
+              <SidebarItem 
+                icon={CalendarDays} 
+                label="Calendar" 
+                active={activeTab === 'calendar'} 
+                onClick={() => handleTabClick('calendar')}
+                tooltipPosition="top"
+              />
+              <SidebarItem 
+                icon={AlertTriangle} 
+                label="Member Violent" 
+                active={activeTab === 'violations'}
+                variant="danger"
+                onClick={() => handleTabClick('violations')}
+                tooltipPosition="top"
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
       {/* Floating Menu Items */}
       <AnimatePresence>
@@ -91,12 +125,6 @@ export const Sidebar = ({ activeTab, setActiveTab, isLoggedIn, loggedInUser, onL
               active={activeTab === 'members'} 
               onClick={() => handleTabClick('members')}
             />
-            <SidebarItem 
-              icon={CalendarDays} 
-              label="Calendar" 
-              active={activeTab === 'calendar'} 
-              onClick={() => handleTabClick('calendar')}
-            />
             <div 
               onClick={() => handleTabClick('activity')}
               className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all duration-200 group relative ${
@@ -115,13 +143,6 @@ export const Sidebar = ({ activeTab, setActiveTab, isLoggedIn, loggedInUser, onL
               label="Ranking" 
               active={activeTab === 'ranking'} 
               onClick={() => handleTabClick('ranking')}
-            />
-            <SidebarItem 
-              icon={AlertTriangle} 
-              label="Member Violent" 
-              active={activeTab === 'violations'}
-              variant="danger"
-              onClick={() => handleTabClick('violations')}
             />
             {canAccessSettings && (
               <>
