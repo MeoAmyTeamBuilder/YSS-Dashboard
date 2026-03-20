@@ -149,11 +149,11 @@ export const CalendarView = () => {
                         onClick={() => setSelectedEvent(event)}
                         className={`text-left flex items-center gap-1 shrink-0 hover:opacity-80 transition-opacity w-full ${
                           event.importantDate === 1 
-                            ? 'text-amber-400 font-bold' 
+                            ? 'text-amber-400 font-bold [text-shadow:0_0_8px_#fbbf24]' 
                             : 'text-blue-300 font-medium'
                         }`}
                       >
-                        {event.importantDate === 1 && <Star size={8} className="fill-amber-400 flex-shrink-0 hidden sm:block" />}
+                        {event.importantDate === 1 && <Star size={8} className="fill-amber-400 flex-shrink-0 hidden sm:block drop-shadow-[0_0_5px_rgba(251,191,36,0.8)]" />}
                         <span className="truncate text-[9px] sm:text-xs leading-tight" title={event.nameDate}>{event.nameDate}</span>
                       </button>
                     ))}
@@ -177,7 +177,7 @@ export const CalendarView = () => {
           >
             <div className="flex justify-between items-start mb-4">
               <h3 className={`text-xl font-bold ${
-                selectedEvent.importantDate === 1 ? 'text-amber-400' : 'text-blue-400'
+                selectedEvent.importantDate === 1 ? 'text-amber-400 [text-shadow:0_0_8px_#fbbf24]' : 'text-blue-400'
               }`}>
                 {selectedEvent.nameDate}
               </h3>
