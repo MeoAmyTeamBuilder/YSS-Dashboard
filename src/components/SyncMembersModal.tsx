@@ -7,6 +7,7 @@ import { logUpdateAction } from '../lib/updates';
 import * as XLSX from 'xlsx';
 import { AllianceMember, User } from '../types';
 import { checkPermission } from '../lib/permissions';
+import { parseNumber } from '../lib/utils';
 
 interface SyncMembersModalProps {
   isOpen: boolean;
@@ -95,12 +96,12 @@ export const SyncMembersModal = ({ isOpen, onClose, onSuccess, loggedInUser }: S
       jsonData.forEach((row: any) => {
         const idMember = String(row['Lord ID'] || row.idMember || '');
         const nameMember = row['Name'] || row['Lord'] || row.nameMember || '';
-        const power = Number(row[columnMapping.power] || row['Current Power'] || row['Top Power'] || row.power || 0);
-        const manaUsed = Number(row[columnMapping.mana] || row['Mana Spent'] || row['Mana Used (Current)'] || row.manaUsed || 0);
-        const totalDead = Number(row[columnMapping.deads] || row['Units Dead'] || row['Units Dead (Current)'] || row['Dead (Current)'] || row.totalDead || 0);
-        const totalHealed = Number(row['Units Healed (Current)'] || row['Units Healed'] || row.totalHealed || 0);
-        const mertitAmount = Number(row[columnMapping.merits] || row['Merits'] || row['Mertit'] || row['Merit'] || row.mertitAmount || 0);
-        const totalKill = Number(row[columnMapping.kills] || row['Units Killed'] || row['Kills'] || row['Total Kills'] || row.totalKill || 0);
+        const power = parseNumber(row[columnMapping.power] || row['Current Power'] || row['Top Power'] || row.power || 0);
+        const manaUsed = parseNumber(row[columnMapping.mana] || row['Mana Spent'] || row['Mana Used (Current)'] || row.manaUsed || 0);
+        const totalDead = parseNumber(row[columnMapping.deads] || row['Units Dead'] || row['Units Dead (Current)'] || row['Dead (Current)'] || row.totalDead || 0);
+        const totalHealed = parseNumber(row['Units Healed (Current)'] || row['Units Healed'] || row.totalHealed || 0);
+        const mertitAmount = parseNumber(row[columnMapping.merits] || row['Merits'] || row['Mertit'] || row['Merit'] || row.mertitAmount || 0);
+        const totalKill = parseNumber(row[columnMapping.kills] || row['Units Killed'] || row['Kills'] || row['Total Kills'] || row.totalKill || 0);
 
         if (!nameMember || power < powerThreshold) {
           return;
@@ -112,9 +113,9 @@ export const SyncMembersModal = ({ isOpen, onClose, onSuccess, loggedInUser }: S
           existing.manaUsed += manaUsed;
           existing.totalDead += totalDead;
           existing.totalHealed += totalHealed;
-          const currentMerit = Number(existing.totalMertit || 0) + mertitAmount;
+          const currentMerit = parseNumber(existing.totalMertit || 0) + mertitAmount;
           existing.totalMertit = String(currentMerit);
-          const currentKill = Number(existing.totalKill || 0) + totalKill;
+          const currentKill = parseNumber(existing.totalKill || 0) + totalKill;
           existing.totalKill = String(currentKill);
         } else {
           memberMap.set(idMember, {

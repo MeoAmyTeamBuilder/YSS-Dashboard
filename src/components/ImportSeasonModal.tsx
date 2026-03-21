@@ -8,6 +8,7 @@ import * as XLSX from 'xlsx';
 
 import { User } from '../types';
 import { checkPermission } from '../lib/permissions';
+import { parseNumber } from '../lib/utils';
 
 interface ImportSeasonModalProps {
   isOpen: boolean;
@@ -113,14 +114,6 @@ export const ImportSeasonModal = ({ isOpen, onClose, onImportSuccess, loggedInUs
       const deadRecords: any[] = [];
       const healRecords: any[] = [];
       const killRecords: any[] = [];
-
-      const parseNumber = (val: any) => {
-        if (!val) return 0;
-        if (typeof val === 'number') return val;
-        const str = String(val).replace(/,/g, '').trim();
-        const num = Number(str);
-        return isNaN(num) ? 0 : num;
-      };
 
       let foundLordId = false;
       jsonData.forEach((row) => {

@@ -45,3 +45,28 @@ export const formatCompactNumber = (num: number): string => {
   }
   return num.toString();
 };
+
+/**
+ * Parses a string or number into an integer, handling K, M, B suffixes.
+ */
+export const parseNumber = (val: any): number => {
+  if (!val) return 0;
+  if (typeof val === 'number') return Math.round(val);
+  
+  let str = String(val).replace(/,/g, '').trim().toUpperCase();
+  let multiplier = 1;
+  
+  if (str.endsWith('B')) {
+    multiplier = 1000000000;
+    str = str.slice(0, -1);
+  } else if (str.endsWith('M')) {
+    multiplier = 1000000;
+    str = str.slice(0, -1);
+  } else if (str.endsWith('K')) {
+    multiplier = 1000;
+    str = str.slice(0, -1);
+  }
+  
+  const num = Number(str) * multiplier;
+  return isNaN(num) ? 0 : Math.round(num);
+};
