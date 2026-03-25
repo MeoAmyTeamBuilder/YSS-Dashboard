@@ -43,10 +43,12 @@ export const ImportSeasonModal = ({ isOpen, onClose, onImportSuccess, loggedInUs
     const workbook = XLSX.read(data);
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
-    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
+    const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" }) as any[];
     
     if (jsonData.length > 0) {
-      setAvailableColumns(jsonData[0]);
+      setAvailableColumns(Object.keys(jsonData[0]));
+    } else {
+      setAvailableColumns([]);
     }
   };
 
@@ -69,17 +71,17 @@ export const ImportSeasonModal = ({ isOpen, onClose, onImportSuccess, loggedInUs
     setIsProcessing(true);
 
     try {
-      // 0. Fetch all members to map idMember (string) to Number(idMember)
+      // 0. Fetch all members to map idMember
       const { data: members, error: membersError } = await supabase
         .from('Member')
         .select('id, idMember');
       
       if (membersError) throw membersError;
       
-      const memberMap = new Map<string, number>();
+      const memberMap = new Map<string, string>();
       members.forEach(m => {
         if (m.idMember) {
-          memberMap.set(String(m.idMember).trim().toLowerCase(), Number(m.idMember));
+          memberMap.set(String(m.idMember).trim().toLowerCase(), String(m.idMember));
         }
       });
 
@@ -98,7 +100,7 @@ export const ImportSeasonModal = ({ isOpen, onClose, onImportSuccess, loggedInUs
       const workbook = XLSX.read(data);
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet) as any[];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: "" }) as any[];
 
       if (jsonData.length === 0) {
         throw new Error('The file is empty');
@@ -136,9 +138,8 @@ export const ImportSeasonModal = ({ isOpen, onClose, onImportSuccess, loggedInUs
           });
         }
 
-        // Mertit (negative becomes 0)
+        // Mertit
         let mertitAmount = parseNumber(row[columnMapping.merits]);
-        if (mertitAmount < 0) mertitAmount = 0;
         if (mertitAmount !== 0) {
           mertitRecords.push({
             idCheckRecord,
@@ -367,15 +368,7 @@ export const ImportSeasonModal = ({ isOpen, onClose, onImportSuccess, loggedInUs
                     {step === 3 && (
                       <div className="space-y-4">
                         {Object.keys(columnMapping).map((key) => {
-                          const filteredCols = availableColumns.filter(col => {
-                            const lowerCol = col.toLowerCase();
-                            if (key === 'merits') return lowerCol.includes('merit');
-                            if (key === 'mana') return lowerCol.includes('mana');
-                            if (key === 'deads') return lowerCol.includes('dead');
-                            if (key === 'heals') return lowerCol.includes('heal');
-                            if (key === 'kills') return lowerCol.includes('kill');
-                            return true;
-                          });
+                          const filteredCols = availableColumns;
                           return (
                             <div key={key} className="space-y-1 relative">
                               <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{key}</label>

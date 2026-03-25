@@ -34,16 +34,21 @@ export const getDirectDriveUrl = (url: string | undefined): string => {
  * Formats a number into a compact string (e.g., 1.2M, 500K)
  */
 export const formatCompactNumber = (num: number): string => {
-  if (num >= 1000000000) {
-    return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
+  const isNegative = num < 0;
+  const absNum = Math.abs(num);
+  
+  let formatted = '';
+  if (absNum >= 1000000000) {
+    formatted = (absNum / 1000000000).toFixed(1).replace(/\.0$/, '') + 'B';
+  } else if (absNum >= 1000000) {
+    formatted = (absNum / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+  } else if (absNum >= 1000) {
+    formatted = (absNum / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+  } else {
+    formatted = absNum.toString();
   }
-  if (num >= 1000000) {
-    return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
-  }
-  if (num >= 1000) {
-    return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
-  }
-  return num.toString();
+  
+  return isNegative ? `-${formatted}` : formatted;
 };
 
 /**
@@ -53,7 +58,7 @@ export const parseNumber = (val: any): number => {
   if (!val) return 0;
   if (typeof val === 'number') return Math.round(val);
   
-  let str = String(val).replace(/,/g, '').trim().toUpperCase();
+  let str = String(val).replace(/,/g, '').replace(/\s/g, '').toUpperCase();
   let multiplier = 1;
   
   if (str.endsWith('B')) {

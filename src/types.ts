@@ -37,35 +37,35 @@ export interface HistoryKingdom {
 
 export interface CheckMana {
   id?: number;
-  idMember: number;
+  idMember: string;
   manas: number;
   idCheckRecord: number;
 }
 
 export interface CheckMertit {
   id?: number;
-  idMember: number;
+  idMember: string;
   mertits: number;
   idCheckRecord: number;
 }
 
 export interface CheckDead {
   id?: number;
-  idMember: number;
+  idMember: string;
   deads: number;
   idCheckRecord: number;
 }
 
 export interface CheckHeal {
   id?: number;
-  idMember: number;
+  idMember: string;
   heals: number;
   idCheckRecord: number;
 }
 
 export interface CheckKill {
   id?: number;
-  idMember: number;
+  idMember: string;
   kills: number;
   idCheckRecord: number;
 }

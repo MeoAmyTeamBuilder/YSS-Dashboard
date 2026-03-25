@@ -91,6 +91,15 @@ export const SyncMembersModal = ({ isOpen, onClose, onSuccess, loggedInUser }: S
       const sheet = workbook.Sheets[sheetName];
       const jsonData = XLSX.utils.sheet_to_json(sheet) as any[];
 
+      // Fetch existing members to preserve data when not provided in Excel
+      const { data: existingMembers, error: fetchError } = await supabase
+        .from('Member')
+        .select('*');
+        
+      if (fetchError) throw fetchError;
+      
+      const existingMemberMap = new Map(existingMembers?.map(m => [m.idMember, m]) || []);
+
       const memberMap = new Map<string, AllianceMember>();
 
       jsonData.forEach((row: any) => {
@@ -131,7 +140,23 @@ export const SyncMembersModal = ({ isOpen, onClose, onSuccess, loggedInUser }: S
         }
       });
 
-      const processedMembers = Array.from(memberMap.values());
+      const processedMembers = Array.from(memberMap.values()).map(member => {
+        const existing = existingMemberMap.get(member.idMember);
+        if (existing) {
+          const { id, ...existingWithoutId } = existing;
+          return {
+            ...existingWithoutId,
+            nameMember: member.nameMember,
+            topPower: Math.max(member.topPower, existing.topPower || 0),
+            manaUsed: member.manaUsed > 0 ? member.manaUsed : (existing.manaUsed || 0),
+            totalDead: member.totalDead > 0 ? member.totalDead : (existing.totalDead || 0),
+            totalHealed: member.totalHealed > 0 ? member.totalHealed : (existing.totalHealed || 0),
+            totalMertit: parseNumber(member.totalMertit) > 0 ? member.totalMertit : (existing.totalMertit || "0"),
+            totalKill: parseNumber(member.totalKill) > 0 ? member.totalKill : (existing.totalKill || "0"),
+          };
+        }
+        return member;
+      });
 
       if (processedMembers.length === 0) {
         throw new Error(`No members found matching the criteria (Power >= ${powerThreshold.toLocaleString()})`);

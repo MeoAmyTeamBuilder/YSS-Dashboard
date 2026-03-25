@@ -122,11 +122,11 @@ export default function App() {
       if (membersData) {
         const leaderMap = new Map();
         if (leadersData) {
-          leadersData.forEach(l => leaderMap.set(l.idMember, l.roleMember));
+          leadersData.forEach(l => leaderMap.set(String(l.idMember).trim().toLowerCase(), l.roleMember));
         }
         const updatedMembers = membersData.map(m => ({
           ...m,
-          roleMember: leaderMap.get(m.idMember) || m.roleMember || '1'
+          roleMember: leaderMap.get(String(m.idMember).trim().toLowerCase()) || m.roleMember || '1'
         }));
         setMembers(updatedMembers);
       }

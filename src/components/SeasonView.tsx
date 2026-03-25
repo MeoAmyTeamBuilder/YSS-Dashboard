@@ -12,7 +12,7 @@ interface SeasonViewProps {
 }
 
 interface JoinedRecord {
-  idMember: number;
+  idMember: string;
   lordId: string;
   nameMember: string;
   merits: number;
@@ -74,9 +74,9 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
       const dataMap = new Map<string, JoinedRecord>();
       members.forEach(m => {
         if (m.idMember) {
-          const normalizedId = String(Number(m.idMember));
+          const normalizedId = String(m.idMember).trim().toLowerCase();
           dataMap.set(normalizedId, {
-            idMember: Number(m.idMember),
+            idMember: String(m.idMember),
             lordId: m.idMember || '',
             nameMember: m.nameMember,
             merits: 0,
@@ -90,49 +90,49 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
 
       if (meritsRes.data) {
         meritsRes.data.forEach(item => {
-          const record = dataMap.get(String(item.idMember));
+          const record = dataMap.get(String(item.idMember).trim().toLowerCase());
           if (record) record.merits = item.mertits;
         });
       }
 
       if (manaRes.data) {
         manaRes.data.forEach(item => {
-          const record = dataMap.get(String(item.idMember));
+          const record = dataMap.get(String(item.idMember).trim().toLowerCase());
           if (record) record.mana = item.manas;
         });
       }
 
       if (deadsRes.data) {
         deadsRes.data.forEach(item => {
-          const record = dataMap.get(String(item.idMember));
+          const record = dataMap.get(String(item.idMember).trim().toLowerCase());
           if (record) record.deads = item.deads;
         });
       }
 
       if (healsRes.data) {
         healsRes.data.forEach(item => {
-          const record = dataMap.get(String(item.idMember));
+          const record = dataMap.get(String(item.idMember).trim().toLowerCase());
           if (record) record.heals = item.heals;
         });
       }
 
       if (killsRes.data) {
         killsRes.data.forEach(item => {
-          const record = dataMap.get(String(item.idMember));
+          const record = dataMap.get(String(item.idMember).trim().toLowerCase());
           if (record) record.kills = item.kills;
         });
       }
 
       const activeMemberIds = new Set([
-        ...(meritsRes.data || []).map(d => String(d.idMember)),
-        ...(manaRes.data || []).map(d => String(d.idMember)),
-        ...(deadsRes.data || []).map(d => String(d.idMember)),
-        ...(healsRes.data || []).map(d => String(d.idMember)),
-        ...(killsRes.data || []).map(d => String(d.idMember))
+        ...(meritsRes.data || []).map(d => String(d.idMember).trim().toLowerCase()),
+        ...(manaRes.data || []).map(d => String(d.idMember).trim().toLowerCase()),
+        ...(deadsRes.data || []).map(d => String(d.idMember).trim().toLowerCase()),
+        ...(healsRes.data || []).map(d => String(d.idMember).trim().toLowerCase()),
+        ...(killsRes.data || []).map(d => String(d.idMember).trim().toLowerCase())
       ]);
 
       const filtered = Array.from(dataMap.values()).filter(r => 
-        activeMemberIds.has(String(r.idMember))
+        activeMemberIds.has(String(r.idMember).trim().toLowerCase())
       );
 
       console.log(`Found ${filtered.length} active records for this season.`);
@@ -157,7 +157,7 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
       switch (sortType) {
         case 'high-low': return valB - valA;
         case 'low-high': return valA - valB;
-        case 'id': return parseInt(a.lordId) - parseInt(b.lordId);
+        case 'id': return a.lordId.localeCompare(b.lordId);
         case 'az': return a.nameMember.localeCompare(b.nameMember);
         case 'za': return b.nameMember.localeCompare(a.nameMember);
         default: return 0;
