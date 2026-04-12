@@ -14,8 +14,9 @@ import { LeaderModal } from './components/LeaderModal';
 import { MemberViolationView } from './components/MemberViolationView';
 import { SignGHModal } from './components/SignGHModal';
 import { SignGHListModal } from './components/SignGHListModal';
+import { MigrationView } from './components/MigrationView';
 import { AllianceMember, AllianceInformation, User as UserType, SignGH, CalendarKvk } from './types';
-import { Users, Zap, Shield, Trophy, Search, Plus, Filter, Upload, Crown, X, PieChart, FileSpreadsheet, Calendar } from 'lucide-react';
+import { Users, Zap, Shield, Trophy, Search, Plus, Filter, Upload, Crown, X, PieChart, FileSpreadsheet, Calendar, Plane } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { supabase } from './lib/supabase';
 import { getDirectDriveUrl, formatCompactNumber } from './lib/utils';
@@ -280,6 +281,7 @@ export default function App() {
              activeTab === 'calendar' ? 'Calendar' : 
              activeTab === 'ranking' ? 'Ranking' : 
              activeTab === 'violations' ? 'Member Violations' :
+             activeTab === 'migration' ? 'Migration Members' :
              activeTab === 'activity' ? (
                <>
                  Season{' '}
@@ -314,6 +316,7 @@ export default function App() {
              activeTab === 'calendar' ? `Track upcoming alliance events and KvK schedule.` : 
              activeTab === 'ranking' ? `View the competitive standings of members.` : 
              activeTab === 'violations' ? `List of members who have violated alliance rules.` :
+             activeTab === 'migration' ? `List of members scheduled for migration to the new kingdom.` :
              activeTab === 'activity' ? `Track and analyze historical performance data for the current season.` :
              'Access alliance features and configurations.'}
           </p>
@@ -416,12 +419,12 @@ export default function App() {
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
-                          setIsSignGHModalOpen(true);
+                          setActiveTab('migration');
                         }}
-                        className="w-full py-3 bg-blue-400 hover:bg-blue-500 text-white rounded-xl text-sm tracking-widest transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20"
+                        className="w-full py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-red-500/20"
                       >
-                        <Zap size={18} />
-                        Sign top GH
+                        <Plane size={18} />
+                        Migration Members
                       </button>
                       <button 
                         onClick={(e) => {
@@ -651,6 +654,10 @@ export default function App() {
 
           {activeTab === 'violations' && (
             <MemberViolationView />
+          )}
+
+          {activeTab === 'migration' && (
+            <MigrationView />
           )}
 
           {activeTab === 'settings' && (

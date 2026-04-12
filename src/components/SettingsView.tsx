@@ -15,6 +15,7 @@ import { ManageRecordsModal } from './ManageRecordsModal';
 import { UpdateHistoryLogModal } from './UpdateHistoryLogModal';
 import { ManageViolationsModal } from './ManageViolationsModal';
 import { ManageSignGHModal } from './ManageSignGHModal';
+import { MigrationMembersManagerModal } from './MigrationMembersManagerModal';
 import { supabase } from '../lib/supabase';
 import { format } from 'date-fns';
 import { logUpdateAction } from '../lib/updates';
@@ -84,6 +85,7 @@ export const SettingsView = ({ loggedInUser, onLeadershipUpdated, onSetPowerThre
   const [isManageViolationsModalOpen, setIsManageViolationsModalOpen] = useState(false);
   const [isManageSignGHModalOpen, setIsManageSignGHModalOpen] = useState(false);
   const [isCalendarKvkModalOpen, setIsCalendarKvkModalOpen] = useState(false);
+  const [isMigrationManagerModalOpen, setIsMigrationManagerModalOpen] = useState(false);
   const [powerInputValue, setPowerInputValue] = useState('60000000');
 
   useEffect(() => {
@@ -175,6 +177,7 @@ export const SettingsView = ({ loggedInUser, onLeadershipUpdated, onSetPowerThre
         onClose={() => setIsMembersManagerModalOpen(false)}
         onOpenUpdateMembers={() => setIsSyncModalOpen(true)}
         onOpenManageViolations={() => setIsManageViolationsModalOpen(true)}
+        onOpenMigrationManager={() => setIsMigrationManagerModalOpen(true)}
       />
 
       <SeasonEventManagerModal
@@ -259,6 +262,11 @@ export const SettingsView = ({ loggedInUser, onLeadershipUpdated, onSetPowerThre
       <CalendarKvkModal
         isOpen={isCalendarKvkModalOpen}
         onClose={() => setIsCalendarKvkModalOpen(false)}
+      />
+
+      <MigrationMembersManagerModal
+        isOpen={isMigrationManagerModalOpen}
+        onClose={() => setIsMigrationManagerModalOpen(false)}
       />
     </div>
   );

@@ -1,17 +1,19 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Users, AlertTriangle, ChevronRight } from 'lucide-react';
+import { X, Users, AlertTriangle, ChevronRight, Plane } from 'lucide-react';
 
 interface MembersManagerModalProps {
   isOpen: boolean;
   onClose: () => void;
   onOpenUpdateMembers: () => void;
   onOpenManageViolations: () => void;
+  onOpenMigrationManager: () => void;
 }
 
-export const MembersManagerModal = ({ isOpen, onClose, onOpenUpdateMembers, onOpenManageViolations }: MembersManagerModalProps) => {
+export const MembersManagerModal = ({ isOpen, onClose, onOpenUpdateMembers, onOpenManageViolations, onOpenMigrationManager }: MembersManagerModalProps) => {
   const options = [
     { title: 'Update Member List', icon: Users, color: 'text-frost-400', onClick: onOpenUpdateMembers },
+    { title: 'Migration Members Manager', icon: Plane, color: 'text-amber-400', onClick: onOpenMigrationManager },
     { title: 'Member Violation Management', icon: AlertTriangle, color: 'text-red-400', onClick: onOpenManageViolations },
   ];
 

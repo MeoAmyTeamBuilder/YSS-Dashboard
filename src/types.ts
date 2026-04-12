@@ -110,6 +110,14 @@ export interface CalendarKvk {
   importantDate?: number;
 }
 
+export interface DiCuMember {
+  id?: number;
+  idmember: string;
+  namemember: string;
+  toppower: number;
+  totalkill: string;
+}
+
 export interface AllianceStats {
   totalMembers: number;
   totalPower: number;

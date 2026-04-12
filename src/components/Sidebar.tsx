@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, Shield, Trophy, TrendingUp, Settings, LogOut, LogIn, LayoutDashboard, Menu, X, Calendar, AlertTriangle, CalendarDays } from 'lucide-react';
+import { Users, Shield, Trophy, TrendingUp, Settings, LogOut, LogIn, LayoutDashboard, Menu, X, Calendar, AlertTriangle, CalendarDays, Plane } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface SidebarItemProps {
@@ -90,6 +90,14 @@ export const Sidebar = ({ activeTab, setActiveTab, isLoggedIn, loggedInUser, onL
                 active={activeTab === 'calendar'} 
                 onClick={() => handleTabClick('calendar')}
                 tooltipPosition="top"
+              />
+              <SidebarItem 
+                icon={Plane} 
+                label="Migration Members" 
+                active={activeTab === 'migration'}
+                onClick={() => handleTabClick('migration')}
+                tooltipPosition="top"
+                variant="success"
               />
               <SidebarItem 
                 icon={AlertTriangle} 
