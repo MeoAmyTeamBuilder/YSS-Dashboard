@@ -184,7 +184,6 @@ export const RankingView = ({ members }: RankingViewProps) => {
   return (
     <div className="h-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
       <RankingTable title="Top Power" icon={Trophy} members={members} valueKey="topPower" valueLabel="Power" colorClass="text-amber-400" />
-      <RankingTable title="Top Total Mana Used" icon={Zap} members={members} valueKey="manaUsed" valueLabel="Total Mana" colorClass="text-frost-400" />
       <RankingTable title="Top Total Dead" icon={Skull} members={members} valueKey="totalDead" valueLabel="Dead" colorClass="text-red-400" />
       <RankingTable title="Top Total Healed" icon={Heart} members={members} valueKey="totalHealed" valueLabel="Healed" colorClass="text-emerald-400" />
       <RankingTable title="Top Merits" icon={Trophy} members={members} valueKey="totalMertit" valueLabel="Merits" colorClass="text-amber-300" />

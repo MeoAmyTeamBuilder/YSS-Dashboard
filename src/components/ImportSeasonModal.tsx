@@ -26,7 +26,6 @@ export const ImportSeasonModal = ({ isOpen, onClose, onImportSuccess, loggedInUs
   const [availableColumns, setAvailableColumns] = useState<string[]>([]);
   const [columnMapping, setColumnMapping] = useState({
     merits: '',
-    mana: '',
     deads: '',
     heals: '',
     kills: ''
@@ -108,10 +107,9 @@ export const ImportSeasonModal = ({ isOpen, onClose, onImportSuccess, loggedInUs
 
       const hasMetricMapping = ['merits', 'mana', 'deads', 'heals', 'kills'].some(key => columnMapping[key as keyof typeof columnMapping] !== '');
       if (!hasMetricMapping) {
-        throw new Error('Please map at least one metric column (Merits, Mana, Deads, Heals, or Kills) before importing.');
+        throw new Error('Please map at least one metric column (Merits, Deads, Heals, or Kills) before importing.');
       }
 
-      const manaRecords: any[] = [];
       const mertitRecords: any[] = [];
       const deadRecords: any[] = [];
       const healRecords: any[] = [];
@@ -127,16 +125,6 @@ export const ImportSeasonModal = ({ isOpen, onClose, onImportSuccess, loggedInUs
         
         const internalId = memberMap.get(lordId.toLowerCase());
         if (!internalId) return;
-
-        // Mana
-        const manaUsed = parseNumber(row[columnMapping.mana]);
-        if (manaUsed !== 0) {
-          manaRecords.push({
-            idCheckRecord,
-            idMember: internalId,
-            manas: manaUsed // Updated from 'deads' to 'manas'
-          });
-        }
 
         // Mertit
         let mertitAmount = parseNumber(row[columnMapping.merits]);
@@ -183,16 +171,11 @@ export const ImportSeasonModal = ({ isOpen, onClose, onImportSuccess, loggedInUs
         throw new Error('Could not find Lord ID in the uploaded file. Ensure the column is named "Lord ID" or "idMember".');
       }
 
-      if (manaRecords.length === 0 && mertitRecords.length === 0 && deadRecords.length === 0 && healRecords.length === 0 && killRecords.length === 0) {
+      if (mertitRecords.length === 0 && deadRecords.length === 0 && healRecords.length === 0 && killRecords.length === 0) {
         throw new Error('No valid data found to import. Please check your column mapping and ensure Lord IDs match the member list.');
       }
 
       // Insert into Supabase
-      if (manaRecords.length > 0) {
-        const { error } = await supabase.from('CheckMana').insert(manaRecords);
-        if (error) throw error;
-      }
-
       if (mertitRecords.length > 0) {
         const { error } = await supabase.from('CheckMertit').insert(mertitRecords);
         if (error) throw error;
@@ -360,7 +343,7 @@ export const ImportSeasonModal = ({ isOpen, onClose, onImportSuccess, loggedInUs
                           <p className="font-bold text-blue-300 mb-1">Required Columns:</p>
                           <p>• Lord ID / idMember</p>
                           <p>• Name / nameMember</p>
-                          <p>• Mana Used (Change) / Merits (Change) / Units Dead (Change)</p>
+                          <p>• Merits (Change) / Units Dead (Change)</p>
                         </div>
                       </div>
                     )}

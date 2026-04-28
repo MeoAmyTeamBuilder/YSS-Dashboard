@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { AllianceMember, CheckRecord } from '../types';
-import { Search, Database, Trophy, Zap, Skull, Users, ChevronDown, ArrowDownUp, ArrowDown, ArrowUp, Hash, SortAsc, SortDesc, X, MoreVertical, RefreshCw } from 'lucide-react';
+import { Search, Database, Trophy, Heart, Skull, Users, ChevronDown, ArrowDownUp, ArrowDown, ArrowUp, Hash, SortAsc, SortDesc, X, MoreVertical, RefreshCw } from 'lucide-react';
 import { formatCompactNumber } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -16,7 +16,6 @@ interface JoinedRecord {
   lordId: string;
   nameMember: string;
   merits: number;
-  mana: number;
   deads: number;
   heals: number;
   kills: number;
@@ -28,7 +27,7 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
   const [joinedData, setJoinedData] = useState<JoinedRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState<'all' | 'merits' | 'mana' | 'deads' | 'heals' | 'kills'>('all');
+  const [filterType, setFilterType] = useState<'all' | 'merits' | 'deads' | 'heals' | 'kills'>('all');
   const [sortType, setSortType] = useState<'high-low' | 'low-high' | 'id' | 'az' | 'za'>('high-low');
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
   const [selectedJoinedRecord, setSelectedJoinedRecord] = useState<JoinedRecord | null>(null);
@@ -57,16 +56,14 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
       setLoading(true);
       console.log('Fetching joined data for record:', recordId);
       
-      const [meritsRes, manaRes, deadsRes, healsRes, killsRes] = await Promise.all([
+      const [meritsRes, deadsRes, healsRes, killsRes] = await Promise.all([
         supabase.from('CheckMertit').select('*').eq('idCheckRecord', recordId),
-        supabase.from('CheckMana').select('*').eq('idCheckRecord', recordId),
         supabase.from('CheckDead').select('*').eq('idCheckRecord', recordId),
         supabase.from('CheckHeal').select('*').eq('idCheckRecord', recordId),
         supabase.from('CheckKill').select('*').eq('idCheckRecord', recordId)
       ]);
 
       if (meritsRes.error) console.error('Error fetching merits:', meritsRes.error);
-      if (manaRes.error) console.error('Error fetching mana:', manaRes.error);
       if (deadsRes.error) console.error('Error fetching deads:', deadsRes.error);
       if (healsRes.error) console.error('Error fetching heals:', healsRes.error);
       if (killsRes.error) console.error('Error fetching kills:', killsRes.error);
@@ -80,7 +77,6 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
             lordId: m.idMember || '',
             nameMember: m.nameMember,
             merits: 0,
-            mana: 0,
             deads: 0,
             heals: 0,
             kills: 0
@@ -92,13 +88,6 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
         meritsRes.data.forEach(item => {
           const record = dataMap.get(String(item.idMember).trim().toLowerCase());
           if (record) record.merits = item.mertits;
-        });
-      }
-
-      if (manaRes.data) {
-        manaRes.data.forEach(item => {
-          const record = dataMap.get(String(item.idMember).trim().toLowerCase());
-          if (record) record.mana = item.manas;
         });
       }
 
@@ -125,7 +114,6 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
 
       const activeMemberIds = new Set([
         ...(meritsRes.data || []).map(d => String(d.idMember).trim().toLowerCase()),
-        ...(manaRes.data || []).map(d => String(d.idMember).trim().toLowerCase()),
         ...(deadsRes.data || []).map(d => String(d.idMember).trim().toLowerCase()),
         ...(healsRes.data || []).map(d => String(d.idMember).trim().toLowerCase()),
         ...(killsRes.data || []).map(d => String(d.idMember).trim().toLowerCase())
@@ -263,7 +251,7 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
 
           <div className="flex items-center gap-3 flex-wrap">
             <div className="flex items-center gap-2">
-              {(['merits', 'mana', 'deads', 'heals', 'kills'] as const).map(type => (
+              {(['merits', 'deads', 'heals', 'kills'] as const).map(type => (
                 <button
                   key={type}
                   onClick={() => setFilterType(filterType === type ? 'all' : type)}
@@ -335,14 +323,6 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
                     </div>
                   </th>
                 )}
-                {(filterType === 'all' || filterType === 'mana') && (
-                  <th className={`p-4 md:p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right ${filterType === 'all' ? 'hidden md:table-cell' : ''}`}>
-                    <div className="flex items-center justify-end gap-2">
-                      <Zap size={14} className="text-frost-400" />
-                      Mana Used
-                    </div>
-                  </th>
-                )}
                 {(filterType === 'all' || filterType === 'deads') && (
                   <th className={`p-4 md:p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right ${filterType === 'all' ? 'hidden md:table-cell' : ''}`}>
                     <div className="flex items-center justify-end gap-2">
@@ -362,7 +342,7 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
                 {(filterType === 'all' || filterType === 'heals') && (
                   <th className={`p-4 md:p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right ${filterType === 'all' ? 'hidden md:table-cell' : ''}`}>
                     <div className="flex items-center justify-end gap-2">
-                      <Zap size={14} className="text-blue-400" />
+                      <Heart size={14} className="text-blue-400" />
                       Heals
                     </div>
                   </th>
@@ -428,18 +408,6 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
                           </span>
                           <div className="w-12 h-1 bg-amber-400/10 rounded-full mt-1 overflow-hidden">
                             <div className="h-full bg-amber-400" style={{ width: `${Math.min(100, (item.merits / 1000000) * 100)}%` }} />
-                          </div>
-                        </div>
-                      </td>
-                    )}
-                    {(filterType === 'all' || filterType === 'mana') && (
-                      <td className={`p-3 md:p-6 text-right ${filterType === 'all' ? 'hidden md:table-cell' : ''}`}>
-                        <div className="flex flex-col items-end">
-                          <span className="text-xs md:text-base font-mono font-black text-frost-400 text-glow">
-                            {formatCompactNumber(item.mana)}
-                          </span>
-                          <div className="w-12 h-1 bg-frost-400/10 rounded-full mt-1 overflow-hidden">
-                            <div className="h-full bg-frost-400" style={{ width: `${Math.min(100, (item.mana / 10000000) * 100)}%` }} />
                           </div>
                         </div>
                       </td>
@@ -543,16 +511,6 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
 
                 <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
                   <div className="flex items-center gap-3">
-                    <Zap size={16} className="text-frost-400" />
-                    <span className="text-xs font-medium text-slate-300">Mana Used</span>
-                  </div>
-                  <span className="text-sm font-mono font-bold text-frost-400">
-                    {formatCompactNumber(selectedJoinedRecord.mana || 0)}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
-                  <div className="flex items-center gap-3">
                     <Skull size={16} className="text-red-400" />
                     <span className="text-xs font-medium text-slate-300">Units Dead</span>
                   </div>
@@ -573,7 +531,7 @@ export const SeasonView = ({ members, checkRecords }: SeasonViewProps) => {
 
                 <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
                   <div className="flex items-center gap-3">
-                    <Zap size={16} className="text-blue-400" />
+                    <Heart size={16} className="text-blue-400" />
                     <span className="text-xs font-medium text-slate-300">Heals</span>
                   </div>
                   <span className="text-sm font-mono font-bold text-blue-400">

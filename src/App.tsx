@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, ChangeEvent } from 'react';
 import { toast, Toaster } from 'react-hot-toast';
 import { Sidebar } from './components/Sidebar';
+import { SnowEffect } from './components/SnowEffect';
 import { StatCard } from './components/StatCard';
 import { MemberTable } from './components/MemberTable';
 import { PowerChart } from './components/PowerChart';
@@ -16,7 +17,7 @@ import { SignGHModal } from './components/SignGHModal';
 import { SignGHListModal } from './components/SignGHListModal';
 import { MigrationView } from './components/MigrationView';
 import { AllianceMember, AllianceInformation, User as UserType, SignGH, CalendarKvk } from './types';
-import { Users, Zap, Shield, Trophy, Search, Plus, Filter, Upload, Crown, X, PieChart, FileSpreadsheet, Calendar, Plane } from 'lucide-react';
+import { Users, Zap, Shield, Trophy, Search, Plus, Filter, Upload, Crown, X, PieChart, FileSpreadsheet, Calendar, Plane, Skull, Snowflake } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { supabase } from './lib/supabase';
 import { getDirectDriveUrl, formatCompactNumber } from './lib/utils';
@@ -37,7 +38,7 @@ export default function App() {
   const [isLeaderModalOpen, setIsLeaderModalOpen] = useState(false);
   const [isSignGHModalOpen, setIsSignGHModalOpen] = useState(false);
   const [isSignGHListModalOpen, setIsSignGHListModalOpen] = useState(false);
-  const [sortBy, setSortBy] = useState<'power' | 'mana' | 'dead' | 'healed'>('power');
+  const [sortBy, setSortBy] = useState<'power' | 'dead' | 'healed'>('power');
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [powerThreshold, setPowerThreshold] = useState<number>(60000000);
   const [historyKingdom, setHistoryKingdom] = useState<any>(null);
@@ -217,14 +218,12 @@ export default function App() {
     )
     .sort((a, b) => {
       if (sortBy === 'power') return b.topPower - a.topPower;
-      if (sortBy === 'mana') return b.manaUsed - a.manaUsed;
       if (sortBy === 'dead') return b.totalDead - a.totalDead;
       if (sortBy === 'healed') return b.totalHealed - a.totalHealed;
       return 0;
     });
 
   const totalPower = members.reduce((acc, m) => acc + m.topPower, 0);
-  const totalMana = members.reduce((acc, m) => acc + m.manaUsed, 0);
 
   return (
     <div className="h-screen bg-[#050505] relative overflow-hidden flex flex-col">
@@ -255,6 +254,7 @@ export default function App() {
           },
         }}
       />
+      <SnowEffect />
       {/* Background Effects */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-frost-500/10 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-frost-600/5 blur-[120px] rounded-full pointer-events-none" />
@@ -339,14 +339,80 @@ export default function App() {
                 {/* Right Side: Alliance Info Box (Moved to top on mobile) */}
                 <div className="lg:col-span-1 order-first lg:order-last">
                   <div 
-                    className={`frost-glass p-4 md:p-6 rounded-xl md:rounded-2xl border-frost-500/20 bg-gradient-to-br from-[#0a0a0a]/90 to-transparent backdrop-blur-xl flex flex-col h-auto lg:h-full cursor-pointer lg:cursor-default mb-2 lg:mb-0`}
+                    className={`frost-glass p-4 md:p-6 rounded-xl md:rounded-2xl border-frost-500/20 bg-gradient-to-br from-[#0a0a0a]/90 to-transparent backdrop-blur-xl flex flex-col h-auto lg:h-full cursor-pointer lg:cursor-default mb-2 lg:mb-0 relative overflow-hidden group`}
                     onClick={() => {
                       if (window.innerWidth < 1024) {
                         setIsProfileModalOpen(true);
                       }
                     }}
                   >
-                    <div className="flex items-center gap-4 flex-shrink-0">
+                    {/* Large Snowflake Decorations with Twinkle Effect */}
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                      <motion.div
+                        className="absolute -top-16 -right-16 text-frost-100"
+                        animate={{
+                          rotate: 360,
+                          scale: [1, 1.05, 1],
+                          opacity: [0.1, 0.4, 0.1],
+                          filter: [
+                            "drop-shadow(0 0 0px rgba(255,255,255,0))",
+                            "drop-shadow(0 0 15px rgba(255,255,255,0.5))",
+                            "drop-shadow(0 0 0px rgba(255,255,255,0))"
+                          ]
+                        }}
+                        transition={{
+                          duration: 4,
+                          repeat: Infinity,
+                          ease: "easeInOut"
+                        }}
+                      >
+                        <Snowflake size={200} strokeWidth={0.4} />
+                      </motion.div>
+                      <motion.div
+                        className="absolute -bottom-20 -left-20 text-frost-200"
+                        animate={{
+                          rotate: -360,
+                          scale: [1, 1.1, 1],
+                          opacity: [0.05, 0.25, 0.05],
+                          filter: [
+                            "drop-shadow(0 0 0px rgba(255,255,255,0))",
+                            "drop-shadow(0 0 20px rgba(255,255,255,0.3))",
+                            "drop-shadow(0 0 0px rgba(255,255,255,0))"
+                          ]
+                        }}
+                        transition={{
+                          duration: 7,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                          delay: 1
+                        }}
+                      >
+                        <Snowflake size={250} strokeWidth={0.3} />
+                      </motion.div>
+                      <motion.div
+                        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white"
+                        animate={{
+                          rotate: 45,
+                          scale: [1, 1.02, 1],
+                          opacity: [0.02, 0.1, 0.02],
+                          filter: [
+                            "drop-shadow(0 0 0px rgba(255,255,255,0))",
+                            "drop-shadow(0 0 30px rgba(255,255,255,0.4))",
+                            "drop-shadow(0 0 0px rgba(255,255,255,0))"
+                          ]
+                        }}
+                        transition={{
+                          duration: 10,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                          delay: 2
+                        }}
+                      >
+                        <Snowflake size={320} strokeWidth={0.15} />
+                      </motion.div>
+                    </div>
+
+                    <div className="flex items-center gap-4 flex-shrink-0 relative z-10">
                       <div className="w-16 h-16 bg-frost-500 rounded-2xl flex items-center justify-center frost-glow shadow-2xl overflow-hidden">
                         {allianceInfo?.imageAlliance ? (
                           <img src={getDirectDriveUrl(allianceInfo.imageAlliance)} alt="Alliance" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
@@ -364,7 +430,7 @@ export default function App() {
                       </div>
                     </div>
 
-                    <div className="hidden lg:block space-y-4 flex-1 mt-6">
+                    <div className="hidden lg:block space-y-4 flex-1 mt-6 relative z-10">
                       <div className="space-y-2">
                         <div className="flex justify-between items-center py-2 border-b border-white/5">
                           <span className="text-sm font-bold text-slate-400">Leader</span>
@@ -395,7 +461,7 @@ export default function App() {
                       </div>
                     </div>
 
-                    <div className="mt-6 pt-4 border-t border-white/10 flex-shrink-0 space-y-3">
+                    <div className="mt-6 pt-4 border-t border-white/10 flex-shrink-0 space-y-3 relative z-10">
                       <div className="grid grid-cols-2 gap-3">
                         <a 
                           href={allianceInfo?.zaloLink} 
@@ -416,16 +482,6 @@ export default function App() {
                           Discord
                         </a>
                       </div>
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setActiveTab('migration');
-                        }}
-                        className="w-full py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-red-500/20"
-                      >
-                        <Plane size={18} />
-                        Migration Members
-                      </button>
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
@@ -516,15 +572,15 @@ export default function App() {
                       badgeClass="bg-amber-400 text-black"
                     />
                     <RankingTable 
-                      title="Top Total Mana Used" 
-                      icon={Zap} 
+                      title="Top Total Dead" 
+                      icon={Skull} 
                       members={members} 
-                      valueKey="manaUsed" 
-                      valueLabel="Total Mana" 
-                      colorClass="text-frost-400" 
+                      valueKey="totalDead" 
+                      valueLabel="Dead" 
+                      colorClass="text-red-400" 
                       limit={3} 
                       variant="card"
-                      badgeClass="bg-frost-400 text-black"
+                      badgeClass="bg-red-400 text-black"
                     />
                   </div>
 
@@ -587,12 +643,6 @@ export default function App() {
                               className={`w-full text-left px-3 py-2 text-xs rounded-lg transition-colors ${sortBy === 'power' ? 'bg-frost-500/20 text-frost-400' : 'text-slate-300 hover:bg-white/5'}`}
                             >
                               Sort by Power
-                            </button>
-                            <button 
-                              onClick={() => { setSortBy('mana'); setIsFilterOpen(false); }}
-                              className={`w-full text-left px-3 py-2 text-xs rounded-lg transition-colors ${sortBy === 'mana' ? 'bg-frost-500/20 text-frost-400' : 'text-slate-300 hover:bg-white/5'}`}
-                            >
-                              Sort by Total Mana Used
                             </button>
                             <button 
                               onClick={() => { setSortBy('dead'); setIsFilterOpen(false); }}

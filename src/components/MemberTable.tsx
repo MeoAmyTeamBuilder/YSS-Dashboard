@@ -41,7 +41,6 @@ export const MemberTable = ({ members }: MemberTableProps) => {
                 <th className="p-4 md:p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Member Information</th>
                 <th className="hidden md:table-cell p-4 md:p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Role</th>
                 <th className="p-4 md:p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">Power</th>
-                <th className="hidden md:table-cell p-4 md:p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">Mana Used</th>
                 <th className="hidden md:table-cell p-4 md:p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">Units Dead</th>
                 <th className="hidden md:table-cell p-4 md:p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">Units Healed</th>
                 <th className="hidden md:table-cell p-4 md:p-6 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] text-right">Merits</th>
@@ -81,11 +80,6 @@ export const MemberTable = ({ members }: MemberTableProps) => {
                   <td className="p-3 md:p-6 text-right">
                     <span className="text-xs md:text-base font-mono font-black text-frost-300 text-glow">
                       {formatCompactNumber(member.topPower || 0)}
-                    </span>
-                  </td>
-                  <td className="hidden md:table-cell p-3 md:p-6 text-right">
-                    <span className="text-xs md:text-base font-mono font-black text-slate-400 text-glow">
-                      {formatCompactNumber(member.manaUsed || 0)}
                     </span>
                   </td>
                   <td className="hidden md:table-cell p-3 md:p-6 text-right">
@@ -171,16 +165,6 @@ export const MemberTable = ({ members }: MemberTableProps) => {
                   </div>
                   <span className="text-sm font-mono font-bold text-frost-300">
                     {formatCompactNumber(selectedMember.topPower || 0)}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
-                  <div className="flex items-center gap-3">
-                    <Zap size={16} className="text-slate-400" />
-                    <span className="text-xs font-medium text-slate-300">Mana Used</span>
-                  </div>
-                  <span className="text-sm font-mono font-bold text-slate-300">
-                    {formatCompactNumber(selectedMember.manaUsed || 0)}
                   </span>
                 </div>
 

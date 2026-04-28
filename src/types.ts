@@ -5,7 +5,7 @@ export interface AllianceMember {
   idMember: string;
   nameMember: string;
   topPower: number;
-  manaUsed: number;
+  manaUsed?: number;
   totalDead: number;
   totalHealed: number;
   totalMertit?: string;

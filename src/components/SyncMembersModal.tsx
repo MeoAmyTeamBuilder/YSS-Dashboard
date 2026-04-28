@@ -25,7 +25,6 @@ export const SyncMembersModal = ({ isOpen, onClose, onSuccess, loggedInUser }: S
   const [availableColumns, setAvailableColumns] = useState<string[]>([]);
   const [columnMapping, setColumnMapping] = useState({
     power: '',
-    mana: '',
     deads: '',
     merits: '',
     kills: ''
@@ -106,7 +105,6 @@ export const SyncMembersModal = ({ isOpen, onClose, onSuccess, loggedInUser }: S
         const idMember = String(row['Lord ID'] || row.idMember || '');
         const nameMember = row['Name'] || row['Lord'] || row.nameMember || '';
         const power = parseNumber(row[columnMapping.power] || row['Current Power'] || row['Top Power'] || row.power || 0);
-        const manaUsed = parseNumber(row[columnMapping.mana] || row['Mana Spent'] || row['Mana Used (Current)'] || row.manaUsed || 0);
         const totalDead = parseNumber(row[columnMapping.deads] || row['Units Dead'] || row['Units Dead (Current)'] || row['Dead (Current)'] || row.totalDead || 0);
         const totalHealed = parseNumber(row['Units Healed (Current)'] || row['Units Healed'] || row.totalHealed || 0);
         const mertitAmount = parseNumber(row[columnMapping.merits] || row['Merits'] || row['Mertit'] || row['Merit'] || row.mertitAmount || 0);
@@ -119,7 +117,6 @@ export const SyncMembersModal = ({ isOpen, onClose, onSuccess, loggedInUser }: S
         if (memberMap.has(idMember)) {
           const existing = memberMap.get(idMember)!;
           existing.topPower = Math.max(existing.topPower, power);
-          existing.manaUsed += manaUsed;
           existing.totalDead += totalDead;
           existing.totalHealed += totalHealed;
           const currentMerit = parseNumber(existing.totalMertit || 0) + mertitAmount;
@@ -131,7 +128,6 @@ export const SyncMembersModal = ({ isOpen, onClose, onSuccess, loggedInUser }: S
             idMember,
             nameMember,
             topPower: power,
-            manaUsed,
             totalDead,
             totalHealed,
             totalMertit: String(mertitAmount),
@@ -148,7 +144,6 @@ export const SyncMembersModal = ({ isOpen, onClose, onSuccess, loggedInUser }: S
             ...existingWithoutId,
             nameMember: member.nameMember,
             topPower: Math.max(member.topPower, existing.topPower || 0),
-            manaUsed: member.manaUsed > 0 ? member.manaUsed : (existing.manaUsed || 0),
             totalDead: member.totalDead > 0 ? member.totalDead : (existing.totalDead || 0),
             totalHealed: member.totalHealed > 0 ? member.totalHealed : (existing.totalHealed || 0),
             totalMertit: parseNumber(member.totalMertit) > 0 ? member.totalMertit : (existing.totalMertit || "0"),
@@ -303,7 +298,7 @@ export const SyncMembersModal = ({ isOpen, onClose, onSuccess, loggedInUser }: S
                         <AlertCircle size={18} className="text-blue-400 shrink-0 mt-0.5" />
                         <div className="text-[11px] text-slate-400 leading-relaxed">
                           <p className="font-bold text-blue-300 mb-1">Data Mapping Info:</p>
-                          <p>• Power, Mana Used, Units Dead, Merits</p>
+                          <p>• Power, Units Dead, Merits</p>
                         </div>
                       </div>
                     )}
