@@ -567,7 +567,7 @@ export default function App() {
                         <div className="flex flex-col gap-0.5">
                           <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Great Hall</h3>
                           <span className="text-sm font-bold text-yellow-400 group-hover:text-yellow-300 transition-colors whitespace-nowrap">
-                            Đăng ký Great Hall (GH)
+                            Sign in Great Hall
                           </span>
                         </div>
                       </div>
