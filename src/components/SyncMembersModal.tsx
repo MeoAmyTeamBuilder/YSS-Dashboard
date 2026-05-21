@@ -157,7 +157,41 @@ export const SyncMembersModal = ({ isOpen, onClose, onSuccess, loggedInUser }: S
         throw new Error(`No members found matching the criteria (Power >= ${powerThreshold.toLocaleString()})`);
       }
 
-      // Sync using upsert to avoid breaking foreign key constraints with historical data
+      // Identify members to delete (those that are currently in DB but NOT in the new list)
+      const incomingIds = new Set(processedMembers.map(m => String(m.idMember)));
+      const idsToDelete = existingMembers
+        ?.map(m => m.idMember)
+        .filter(id => !incomingIds.has(id)) || [];
+
+      if (idsToDelete.length > 0) {
+        // Delete residual members and their related data in chunks
+        const chunkSize = 50;
+        for (let i = 0; i < idsToDelete.length; i += chunkSize) {
+          const chunk = idsToDelete.slice(i, i + chunkSize);
+          
+          // First delete from all potential dependent tables to allow Member deletion
+          const dependentTables = [
+            'CheckMana', 'CheckMertit', 'CheckDead', 'CheckHeal', 'CheckKill',
+            'MemberViolation', 'SignGH'
+          ];
+          
+          await Promise.all(dependentTables.map(table => 
+            supabase.from(table).delete().in('idMember', chunk)
+          ));
+
+          // Now delete the members themselves
+          const { error: deleteError } = await supabase
+            .from('Member')
+            .delete()
+            .in('idMember', chunk);
+          
+          if (deleteError) {
+            console.warn(`Could not delete some residual members after clearing dependents (chunk ${i/chunkSize}):`, deleteError);
+          }
+        }
+      }
+
+      // Sync using upsert
       const { error: upsertError } = await supabase
         .from('Member')
         .upsert(processedMembers, { onConflict: 'idMember' });

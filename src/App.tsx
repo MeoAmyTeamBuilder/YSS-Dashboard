@@ -126,7 +126,22 @@ export default function App() {
         if (leadersData) {
           leadersData.forEach(l => leaderMap.set(String(l.idMember).trim().toLowerCase(), l.roleMember));
         }
-        const updatedMembers = membersData.map(m => ({
+        // Deduplicate members by idMember to ensure accurate counts
+        const uniqueMemberMap = new Map();
+        membersData.forEach(m => {
+          const id = String(m.idMember).trim().toLowerCase();
+          if (!uniqueMemberMap.has(id)) {
+            uniqueMemberMap.set(id, m);
+          } else {
+            // Keep the one with higher topPower if duplicates exist
+            const existing = uniqueMemberMap.get(id);
+            if (m.topPower > existing.topPower) {
+              uniqueMemberMap.set(id, m);
+            }
+          }
+        });
+
+        const updatedMembers = Array.from(uniqueMemberMap.values()).map(m => ({
           ...m,
           roleMember: leaderMap.get(String(m.idMember).trim().toLowerCase()) || m.roleMember || '1'
         }));
@@ -213,8 +228,9 @@ export default function App() {
 
   const filteredMembers = members
     .filter(m => 
-      m.nameMember.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      m.idMember.includes(searchTerm)
+      (m.nameMember.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      m.idMember.includes(searchTerm)) &&
+      m.topPower >= powerThreshold
     )
     .sort((a, b) => {
       if (sortBy === 'power') return b.topPower - a.topPower;
@@ -223,7 +239,8 @@ export default function App() {
       return 0;
     });
 
-  const totalPower = members.reduce((acc, m) => acc + m.topPower, 0);
+  const activeMembers = members.filter(m => m.topPower >= powerThreshold);
+  const totalPower = activeMembers.reduce((acc, m) => acc + m.topPower, 0);
 
   return (
     <div className="h-screen bg-[#050505] relative overflow-hidden flex flex-col">
@@ -540,13 +557,37 @@ export default function App() {
                         )}
                       </div>
                     </div>
+
+                    {/* Great Hall (GH) Registration & List */}
+                    <div className="flex items-center justify-between gap-3 flex-1 p-3 px-4 cursor-pointer hover:bg-white/[0.02] transition-colors group animate-pulse-slow" onClick={() => setIsSignGHModalOpen(true)}>
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-xl bg-yellow-500/20 text-yellow-400 group-hover:scale-105 transition-transform shadow-[0_0_12px_rgba(234,179,8,0.3)]">
+                          <Zap size={20} className="animate-pulse" />
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                          <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Great Hall</h3>
+                          <span className="text-sm font-bold text-yellow-400 group-hover:text-yellow-300 transition-colors whitespace-nowrap">
+                            Đăng ký Great Hall (GH)
+                          </span>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsSignGHListModalOpen(true);
+                        }}
+                        className="px-2.5 py-1.5 text-[10px] font-bold bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 hover:text-yellow-200 border border-yellow-500/30 rounded-xl transition-all shadow-md shadow-yellow-500/5 whitespace-nowrap relative z-20"
+                      >
+                        Danh sách GH
+                      </button>
+                    </div>
                   </div>
 
                   {/* Row 1: Stat Cards */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 flex-shrink-0">
                     <StatCard 
                       label="Total Members" 
-                      value={`${members.length} / 200`} 
+                      value={`${activeMembers.length} / 200`} 
                       icon={Users} 
                       trend={{ value: 'Live', isUp: true }}
                     />
@@ -563,7 +604,7 @@ export default function App() {
                     <RankingTable 
                       title="Top Power" 
                       icon={Trophy} 
-                      members={members} 
+                      members={activeMembers} 
                       valueKey="topPower" 
                       valueLabel="Power" 
                       colorClass="text-amber-400" 
@@ -574,7 +615,7 @@ export default function App() {
                     <RankingTable 
                       title="Top Total Dead" 
                       icon={Skull} 
-                      members={members} 
+                      members={activeMembers} 
                       valueKey="totalDead" 
                       valueLabel="Dead" 
                       colorClass="text-red-400" 
@@ -587,7 +628,7 @@ export default function App() {
                   {/* Row 3: Power Distribution Chart */}
                   <div className="flex-1 min-h-0">
                     <div className="hidden md:block h-full">
-                      <PowerChart members={members} />
+                      <PowerChart members={activeMembers} />
                     </div>
                     <div 
                       className="md:hidden frost-glass p-4 rounded-xl md:rounded-2xl border-frost-500/10 flex flex-col cursor-pointer hover:bg-white/[0.02] transition-colors"
@@ -616,10 +657,15 @@ export default function App() {
                     <input 
                       type="text" 
                       placeholder="Search by name or ID..."
-                      className="w-full bg-white/5 border border-white/10 rounded-xl py-1.5 pl-9 pr-4 text-xs focus:outline-none focus:border-frost-500/50 focus:ring-1 focus:ring-frost-500/50 transition-all"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl py-1.5 pl-9 pr-4 text-xs focus:outline-none focus:border-frost-500/50 focus:ring-1 focus:ring-frost-500/50 transition-all text-white"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
+                  </div>
+                  <div className="flex items-center px-4 bg-white/5 border border-white/10 rounded-xl whitespace-nowrap">
+                    <span className="text-[10px] font-bold text-slate-400">
+                      Count: <span className="text-frost-400">{filteredMembers.length}</span>
+                    </span>
                   </div>
                   <div className="relative">
                     <button 
@@ -692,14 +738,14 @@ export default function App() {
 
           {activeTab === 'activity' && (
             <SeasonView 
-              members={members} 
+              members={activeMembers} 
               checkRecords={checkRecords} 
               historyKingdom={historyKingdom}
             />
           )}
 
           {activeTab === 'ranking' && (
-            <RankingView members={members} />
+            <RankingView members={activeMembers} />
           )}
 
           {activeTab === 'violations' && (
