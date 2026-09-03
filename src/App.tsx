@@ -479,7 +479,7 @@ export default function App() {
                     </div>
 
                     <div className="mt-6 pt-4 border-t border-white/10 flex-shrink-0 space-y-3 relative z-10">
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="grid grid-cols-3 gap-3">
                         <a 
                           href={allianceInfo?.zaloLink} 
                           target="_blank" 
@@ -498,6 +498,16 @@ export default function App() {
                         >
                           Discord
                         </a>
+                        {/* NÚT MỚI — chèn ngay sau thẻ </a> của Discord, dòng 500 */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setIsSignGHModalOpen(true);
+                          }}
+                          className="p-3 rounded-xl bg-emerald-200 text-emerald-900 border border-emerald-300 text-center text-sm font-bold hover:bg-emerald-600 hover:text-white transition-all"
+                        >
+                          Sign GH
+                        </button>
                       </div>
                       <button 
                         onClick={(e) => {
