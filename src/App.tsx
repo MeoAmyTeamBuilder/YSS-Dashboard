@@ -498,6 +498,17 @@ export default function App() {
                         >
                           Discord
                         </a>
+                         {/* Nút button Đăng kí GH */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setIsSignGHModalOpen(true);
+                            }}
+                            className="p-3 rounded-xl bg-emerald-200 text-emerald-900 border border-emerald-300 text-center text-sm font-bold hover:bg-emerald-600 hover:text-white transition-all"
+                          >
+                            Sign GH
+                          </button>
+                        </div>
                       </div>
                       <button 
                         onClick={(e) => {
